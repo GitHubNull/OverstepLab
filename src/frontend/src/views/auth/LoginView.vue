@@ -1,31 +1,30 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 relative overflow-hidden">
-    <!-- Background decoration -->
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="absolute -top-40 -right-40 w-96 h-96 bg-indigo-500/8 rounded-full blur-3xl"></div>
-      <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-500/8 rounded-full blur-3xl"></div>
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-3xl"></div>
-    </div>
+  <div class="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0a0a0a]">
+    <!-- Animated grid background -->
+    <div class="absolute inset-0 grid-bg opacity-60"></div>
+    <!-- Subtle radial glow -->
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(79,70,229,0.08)_0%,transparent_70%)]"></div>
 
     <div class="relative z-10 w-full max-w-[420px] px-4">
-      <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl shadow-black/20 border border-white/10">
-        <!-- Logo and Title -->
+      <!-- Glass card -->
+      <div class="glass rounded-2xl p-8 shadow-2xl shadow-black/40">
+        <!-- Logo -->
         <div class="text-center mb-7">
-          <div class="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl shadow-lg shadow-indigo-200/50 mb-4">
+          <div class="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl shadow-lg shadow-indigo-500/20 mb-4">
             <i class="pi pi-shield text-2xl text-white"></i>
           </div>
-          <h1 class="text-2xl font-bold text-slate-800 dark:text-white mb-1">OverstepLab</h1>
-          <p class="text-sm text-slate-400">越权漏洞测试靶场</p>
+          <h1 class="text-2xl font-bold text-white mb-1">OverstepLab</h1>
+          <p class="text-sm text-neutral-400">越权漏洞测试靶场</p>
         </div>
 
         <form @submit.prevent="handleLogin">
           <div class="mb-4">
-            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">用户名</label>
+            <label class="block text-xs font-semibold text-neutral-400 mb-1.5 uppercase tracking-wider">用户名</label>
             <span class="p-input-icon-left w-full block">
-              <i class="pi pi-user text-slate-400 z-10" />
+              <i class="pi pi-user text-neutral-500 z-10" />
               <InputText
                 v-model="username"
-                class="w-full pl-10"
+                class="w-full pl-10 bg-white/5 border-white/10 text-white placeholder:text-neutral-500 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
                 placeholder="请输入用户名"
                 required
                 :class="{ 'p-invalid': error }"
@@ -33,11 +32,11 @@
             </span>
           </div>
           <div class="mb-6">
-            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">密码</label>
+            <label class="block text-xs font-semibold text-neutral-400 mb-1.5 uppercase tracking-wider">密码</label>
             <Password
               v-model="password"
               class="w-full"
-              input-class="w-full"
+              input-class="w-full bg-white/5 border-white/10 text-white placeholder:text-neutral-500 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
               placeholder="请输入密码"
               :feedback="false"
               required
@@ -55,36 +54,32 @@
         </form>
 
         <div class="mt-5 text-center">
-          <router-link to="/register" class="text-indigo-500 hover:text-indigo-600 text-sm font-medium transition-colors">
+          <router-link to="/register" class="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors">
             没有账号？立即注册
           </router-link>
         </div>
 
         <!-- Test Accounts -->
-        <div class="mt-6 p-4 bg-slate-50 dark:bg-slate-700/40 rounded-xl border border-slate-100 dark:border-slate-600/50">
-          <p class="font-semibold text-xs text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-1.5 uppercase tracking-wider">
-            <i class="pi pi-info-circle text-indigo-400 text-sm"></i>
+        <div class="mt-6 p-3 bg-white/5 rounded-xl border border-white/10">
+          <p class="font-semibold text-[10px] text-neutral-400 mb-2 flex items-center gap-1.5 uppercase tracking-wider">
+            <i class="pi pi-info-circle text-indigo-400 text-xs"></i>
             测试账户
           </p>
-          <div class="space-y-1.5 text-sm">
-            <div class="flex items-center justify-between p-2 bg-white dark:bg-slate-800/80 rounded-lg cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-colors" @click="fillLogin('admin', 'admin123')">
-              <span class="font-medium text-slate-700 dark:text-slate-300">admin</span>
-              <Tag value="平台管理员" severity="danger" class="text-[10px]" />
-            </div>
-            <div class="flex items-center justify-between p-2 bg-white dark:bg-slate-800/80 rounded-lg cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-colors" @click="fillLogin('acme_admin', 'pass123')">
-              <span class="font-medium text-slate-700 dark:text-slate-300">acme_admin</span>
-              <Tag value="企业管理员" severity="warn" class="text-[10px]" />
-            </div>
-            <div class="flex items-center justify-between p-2 bg-white dark:bg-slate-800/80 rounded-lg cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-colors" @click="fillLogin('alice', 'pass123')">
-              <span class="font-medium text-slate-700 dark:text-slate-300">alice</span>
-              <Tag value="个人用户" severity="info" class="text-[10px]" />
+          <div class="space-y-1 text-sm">
+            <div
+              v-for="account in testAccounts"
+              :key="account.user"
+              class="flex items-center justify-between px-2.5 py-1.5 bg-white/5 rounded-lg cursor-pointer hover:bg-indigo-500/10 transition-colors border border-transparent hover:border-indigo-500/20"
+              @click="fillLogin(account.user, account.pass)"
+            >
+              <span class="font-medium text-neutral-300 text-xs">{{ account.user }}</span>
+              <Tag :value="account.role" :severity="account.severity" class="text-[10px]" />
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Footer -->
-      <p class="text-center text-slate-500/60 text-xs mt-5">
+      <p class="text-center text-neutral-600 text-xs mt-5">
         OverstepLab - 仅供安全研究与学习使用
       </p>
     </div>
@@ -109,6 +104,12 @@ const username = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref(false)
+
+const testAccounts = [
+  { user: 'admin', pass: 'admin123', role: '平台管理员', severity: 'danger' as const },
+  { user: 'acme_admin', pass: 'pass123', role: '企业管理员', severity: 'warn' as const },
+  { user: 'alice', pass: 'pass123', role: '个人用户', severity: 'info' as const },
+]
 
 function fillLogin(user: string, pass: string) {
   username.value = user

@@ -1,24 +1,19 @@
 <template>
   <div class="space-y-5">
-    <!-- Header -->
-    <div class="page-header">
-      <h2>订单管理</h2>
-      <p>查看您的购买和续费记录</p>
-    </div>
+    <PageHeader title="订单管理" description="查看您的购买和续费记录" />
 
-    <!-- Orders Table -->
-    <Card class="shadow-none">
-      <template #title>
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-[var(--border-default)]">
         <div class="section-title">
           <i class="pi pi-receipt"></i>
           <span>订单列表</span>
         </div>
-      </template>
-      <template #content>
-        <DataTable :value="orders" stripedRows class="p-datatable-sm" :rows="10" paginator>
+      </div>
+      <div class="p-0">
+        <DataTable :value="orders" class="p-datatable-sm" :rows="10" paginator>
           <Column field="order_no" header="订单号">
             <template #body="{ data }">
-              <code class="text-xs bg-slate-50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300">{{ data.order_no }}</code>
+              <code class="text-xs bg-[var(--bg-base)] px-1.5 py-0.5 rounded text-[var(--text-secondary)] mono">{{ data.order_no }}</code>
             </template>
           </Column>
           <Column field="type" header="类型">
@@ -28,7 +23,7 @@
           </Column>
           <Column field="amount" header="金额">
             <template #body="{ data }">
-              <span class="font-semibold text-sm text-slate-700 dark:text-slate-200">¥{{ data.amount.toFixed(2) }}</span>
+              <span class="font-semibold text-sm text-[var(--text-primary)] mono">¥{{ data.amount.toFixed(2) }}</span>
             </template>
           </Column>
           <Column field="status" header="状态">
@@ -38,12 +33,12 @@
           </Column>
           <Column header="创建时间">
             <template #body="{ data }">
-              <span class="text-xs text-slate-400">{{ formatDate(data.created_at) }}</span>
+              <span class="text-xs text-[var(--text-tertiary)]">{{ formatDate(data.created_at) }}</span>
             </template>
           </Column>
         </DataTable>
-      </template>
-    </Card>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -51,11 +46,11 @@
 import { ref, onMounted } from 'vue'
 import * as api from '@/api'
 import type { Order } from '@/types'
-import Card from 'primevue/card'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import { formatDate } from '@/utils/date'
+import PageHeader from '@/components/PageHeader.vue'
 
 const orders = ref<Order[]>([])
 

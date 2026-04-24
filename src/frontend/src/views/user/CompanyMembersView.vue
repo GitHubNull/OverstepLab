@@ -1,25 +1,15 @@
 <template>
   <div class="space-y-5">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div class="page-header">
-        <h2>企业成员</h2>
-        <p>管理企业内的用户和权限</p>
-      </div>
-      <Button
-        label="添加成员"
-        icon="pi pi-plus"
-        size="small"
-        @click="showAddDialog = true"
-      />
-    </div>
+    <PageHeader title="企业成员" description="管理企业内的用户和权限">
+      <template #actions>
+        <Button label="添加成员" icon="pi pi-plus" size="small" @click="showAddDialog = true" />
+      </template>
+    </PageHeader>
 
-    <!-- Members Table -->
-    <Card class="shadow-none">
-      <template #content>
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl overflow-hidden">
+      <div class="p-0">
         <DataTable
           :value="members"
-          stripedRows
           class="p-datatable-sm"
           :rows="10"
           paginator
@@ -32,9 +22,9 @@
                   :label="data.username.charAt(0).toUpperCase()"
                   shape="circle"
                   size="small"
-                  class="bg-indigo-100 text-indigo-600 text-xs"
+                  class="bg-[var(--primary-subtle)] text-[var(--primary)] text-xs"
                 />
-                <span class="font-medium text-sm text-slate-700 dark:text-slate-200">{{ data.username }}</span>
+                <span class="font-medium text-sm text-[var(--text-primary)]">{{ data.username }}</span>
               </div>
             </template>
           </Column>
@@ -47,7 +37,7 @@
 
           <Column field="email" header="邮箱">
             <template #body="{ data }">
-              <span class="text-sm text-slate-500">{{ data.email || '-' }}</span>
+              <span class="text-sm text-[var(--text-secondary)]">{{ data.email || '-' }}</span>
             </template>
           </Column>
 
@@ -57,35 +47,35 @@
             </template>
           </Column>
 
-          <Column header="操作" style="width: 140px">
+          <Column header="操作" style="width: 100px">
             <template #body="{ data }">
               <div class="flex gap-1">
-                <Button icon="pi pi-pencil" text rounded size="small" class="text-slate-400" @click="openEditRole(data)" v-tooltip.top="'修改角色'" />
-                <Button icon="pi pi-trash" text rounded size="small" severity="danger" class="!text-red-400" @click="handleDelete(data)" v-tooltip.top="'删除成员'" />
+                <Button icon="pi pi-pencil" text rounded size="small" class="text-[var(--text-tertiary)]" @click="openEditRole(data)" v-tooltip.top="'修改角色'" />
+                <Button icon="pi pi-trash" text rounded size="small" severity="danger" class="!text-[var(--danger)]" @click="handleDelete(data)" v-tooltip.top="'删除成员'" />
               </div>
             </template>
           </Column>
         </DataTable>
-      </template>
-    </Card>
+      </div>
+    </div>
 
     <!-- Add Member Dialog -->
     <Dialog v-model:visible="showAddDialog" header="添加成员" modal :style="{ width: '420px' }">
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">用户名</label>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">用户名</label>
           <InputText v-model="addForm.username" class="w-full" placeholder="请输入用户名" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">密码</label>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">密码</label>
           <Password v-model="addForm.password" class="w-full" placeholder="请输入密码" :feedback="false" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">邮箱</label>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">邮箱</label>
           <InputText v-model="addForm.email" type="email" class="w-full" placeholder="请输入邮箱" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">角色</label>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">角色</label>
           <Select v-model="addForm.role" :options="roleOptions" optionLabel="label" optionValue="value" placeholder="选择角色" class="w-full" />
         </div>
       </div>
@@ -98,7 +88,7 @@
     <!-- Edit Role Dialog -->
     <Dialog v-model:visible="showRoleDialog" header="修改角色" modal :style="{ width: '380px' }">
       <div class="space-y-3">
-        <p class="text-sm text-slate-500">修改 <strong class="text-slate-700 dark:text-white">{{ editingUser?.username }}</strong> 的角色：</p>
+        <p class="text-sm text-[var(--text-secondary)]">修改 <strong class="text-[var(--text-primary)]">{{ editingUser?.username }}</strong> 的角色：</p>
         <Select v-model="editRole" :options="roleOptions" optionLabel="label" optionValue="value" placeholder="选择角色" class="w-full" />
       </div>
       <template #footer>
@@ -113,7 +103,6 @@
 import { ref, onMounted } from 'vue'
 import * as api from '@/api'
 import type { User } from '@/types'
-import Card from 'primevue/card'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Tag from 'primevue/tag'
@@ -125,18 +114,17 @@ import Password from 'primevue/password'
 import Select from 'primevue/select'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
+import PageHeader from '@/components/PageHeader.vue'
 
 const toast = useToast()
 const confirm = useConfirm()
 const members = ref<User[]>([])
 const loading = ref(false)
 
-// Add member
 const showAddDialog = ref(false)
 const adding = ref(false)
 const addForm = ref({ username: '', password: '', email: '', role: 'operator' })
 
-// Edit role
 const showRoleDialog = ref(false)
 const changingRole = ref(false)
 const editingUser = ref<User | null>(null)

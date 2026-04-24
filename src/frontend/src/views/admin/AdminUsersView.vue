@@ -1,56 +1,16 @@
 <template>
-  <div class="space-y-5">
-    <!-- Header -->
-    <div class="page-header">
-      <h2>用户管理</h2>
-      <p>管理平台内所有用户账户</p>
-    </div>
+  <div>
+    <PageHeader title="用户管理" description="管理平台内所有用户账户" />
 
     <!-- Stats -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <Card class="shadow-none stat-card stat-card-blue">
-        <template #content>
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-              <i class="pi pi-users text-blue-500 text-sm"></i>
-            </div>
-            <div>
-              <p class="text-[10px] text-slate-400 font-medium">总用户数</p>
-              <p class="text-lg font-bold text-slate-800 dark:text-white">{{ users.length }}</p>
-            </div>
-          </div>
-        </template>
-      </Card>
-      <Card class="shadow-none stat-card stat-card-green">
-        <template #content>
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
-              <i class="pi pi-check text-emerald-500 text-sm"></i>
-            </div>
-            <div>
-              <p class="text-[10px] text-slate-400 font-medium">正常用户</p>
-              <p class="text-lg font-bold text-emerald-600">{{ activeUsers }}</p>
-            </div>
-          </div>
-        </template>
-      </Card>
-      <Card class="shadow-none stat-card stat-card-red">
-        <template #content>
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
-              <i class="pi pi-ban text-red-500 text-sm"></i>
-            </div>
-            <div>
-              <p class="text-[10px] text-slate-400 font-medium">禁用用户</p>
-              <p class="text-lg font-bold text-red-500">{{ disabledUsers }}</p>
-            </div>
-          </div>
-        </template>
-      </Card>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+      <StatCard color="#4f46e5" icon="pi pi-users" :value="users.length" label="总用户数" />
+      <StatCard color="#10b981" icon="pi pi-check" :value="activeUsers" label="正常用户" />
+      <StatCard color="#f43f5e" icon="pi pi-ban" :value="disabledUsers" label="禁用用户" />
     </div>
 
     <!-- Users Table -->
-    <Card class="shadow-none">
+    <Card>
       <template #title>
         <div class="section-title">
           <i class="pi pi-users"></i>
@@ -61,14 +21,14 @@
         <DataTable :value="users" stripedRows class="p-datatable-sm" :rows="10" paginator>
           <Column field="id" header="ID" style="width: 60px">
             <template #body="{ data }">
-              <code class="text-[10px] bg-slate-50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded">{{ data.id }}</code>
+              <span class="mono text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-base)] text-[var(--text-secondary)]">{{ data.id }}</span>
             </template>
           </Column>
           <Column field="username" header="用户名">
             <template #body="{ data }">
               <div class="flex items-center gap-2">
-                <Avatar :label="data.username.charAt(0).toUpperCase()" shape="circle" size="small" class="bg-indigo-100 text-indigo-600 text-xs" />
-                <span class="font-medium text-sm text-slate-700 dark:text-slate-200">{{ data.username }}</span>
+                <Avatar :label="data.username.charAt(0).toUpperCase()" shape="circle" size="small" class="bg-[var(--primary-subtle)] text-[var(--primary)] text-xs" />
+                <span class="font-medium text-sm text-[var(--text-primary)]">{{ data.username }}</span>
               </div>
             </template>
           </Column>
@@ -80,7 +40,7 @@
           <Column field="role" header="角色">
             <template #body="{ data }">
               <Tag v-if="data.role" :value="getRoleText(data.role)" severity="info" class="text-[10px]" />
-              <span v-else class="text-slate-300 text-xs">-</span>
+              <span v-else class="text-[var(--text-tertiary)] text-xs">-</span>
             </template>
           </Column>
           <Column field="status" header="状态">
@@ -111,6 +71,8 @@
 import { ref, computed, onMounted } from 'vue'
 import * as api from '@/api'
 import type { User } from '@/types'
+import PageHeader from '@/components/PageHeader.vue'
+import StatCard from '@/components/StatCard.vue'
 import Card from 'primevue/card'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'

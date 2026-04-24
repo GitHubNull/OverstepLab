@@ -1,14 +1,10 @@
 <template>
-  <div class="space-y-5">
-    <!-- Header -->
-    <div class="page-header">
-      <h2>系统设置</h2>
-      <p>管理系统配置和数据</p>
-    </div>
+  <div>
+    <PageHeader title="系统设置" description="管理系统配置和数据" />
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <!-- Database Management -->
-      <Card class="shadow-none">
+      <Card>
         <template #title>
           <div class="section-title">
             <i class="pi pi-database"></i>
@@ -16,19 +12,21 @@
           </div>
         </template>
         <template #content>
-          <div class="space-y-4">
-            <div class="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-800/30 rounded-xl p-4">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-9 h-9 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
-                  <i class="pi pi-exclamation-triangle text-red-500 text-sm"></i>
+          <div class="relative rounded-xl p-4 overflow-hidden" style="background: var(--danger-subtle); border: 1px solid var(--danger-subtle);">
+            <!-- Left danger bar -->
+            <div class="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full" style="background: var(--danger);"></div>
+            <div class="pl-3 space-y-4">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: var(--danger-subtle);">
+                  <i class="pi pi-exclamation-triangle text-sm" style="color: var(--danger);"></i>
                 </div>
                 <div>
-                  <p class="font-semibold text-sm text-slate-700 dark:text-white">重置数据库</p>
-                  <p class="text-[10px] text-slate-400">清除所有数据并恢复初始状态</p>
+                  <p class="font-semibold text-sm text-[var(--text-primary)]">重置数据库</p>
+                  <p class="text-[10px] text-[var(--text-tertiary)]">清除所有数据并恢复初始状态</p>
                 </div>
               </div>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                此操作将删除所有用户数据、VPS 实例、订单记录等，并将数据库恢复到初始种子状态。<strong class="text-red-500">此操作不可撤销！</strong>
+              <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+                此操作将删除所有用户数据、VPS 实例、订单记录等，并将数据库恢复到初始种子状态。<strong style="color: var(--danger);">此操作不可撤销！</strong>
               </p>
               <Button
                 label="重置数据库"
@@ -43,7 +41,7 @@
       </Card>
 
       <!-- Security Mode -->
-      <Card class="shadow-none">
+      <Card>
         <template #title>
           <div class="section-title">
             <i class="pi pi-shield"></i>
@@ -53,26 +51,31 @@
         <template #content>
           <div class="space-y-4">
             <div
-              class="rounded-xl p-4 border-2 transition-colors"
-              :class="authStore.securityMode === 'vulnerable'
-                ? 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800/50'
-                : 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800/50'"
+              class="rounded-xl p-4 border transition-all duration-300"
+              :class="authStore.securityMode === 'vulnerable' ? 'status-pulse-danger' : ''"
+              style="border-width: 1px;"
+              :style="authStore.securityMode === 'vulnerable'
+                ? { background: 'var(--danger-subtle)', borderColor: 'var(--danger-subtle)' }
+                : { background: 'var(--success-subtle)', borderColor: 'var(--success-subtle)' }"
             >
               <div class="flex items-center gap-3">
                 <div
                   class="w-11 h-11 rounded-xl flex items-center justify-center"
-                  :class="authStore.securityMode === 'vulnerable' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-emerald-100 dark:bg-emerald-900/30'"
+                  :style="authStore.securityMode === 'vulnerable'
+                    ? { background: 'var(--danger-subtle)' }
+                    : { background: 'var(--success-subtle)' }"
                 >
                   <i
                     class="pi text-xl"
-                    :class="authStore.securityMode === 'vulnerable' ? 'pi-unlock text-red-500' : 'pi-lock text-emerald-500'"
+                    :class="authStore.securityMode === 'vulnerable' ? 'pi-unlock' : 'pi-lock'"
+                    :style="{ color: authStore.securityMode === 'vulnerable' ? 'var(--danger)' : 'var(--success)' }"
                   ></i>
                 </div>
                 <div>
-                  <p class="font-semibold text-sm text-slate-700 dark:text-white">
+                  <p class="font-semibold text-sm text-[var(--text-primary)]">
                     当前模式: {{ authStore.securityMode === 'vulnerable' ? '漏洞模式' : '安全模式' }}
                   </p>
-                  <p class="text-[10px] text-slate-400 mt-0.5">
+                  <p class="text-[10px] text-[var(--text-tertiary)] mt-0.5">
                     {{ authStore.securityMode === 'vulnerable'
                       ? '所有越权漏洞均可触发'
                       : '所有漏洞已被修复，权限校验严格' }}
@@ -82,7 +85,7 @@
             </div>
 
             <div class="info-row">
-              <span class="text-xs text-slate-500 dark:text-slate-400">切换安全模式</span>
+              <span class="text-xs text-[var(--text-secondary)]">切换安全模式</span>
               <ToggleSwitch
                 v-model="isSecureMode"
                 @change="toggleMode"
@@ -93,7 +96,7 @@
       </Card>
 
       <!-- System Info -->
-      <Card class="shadow-none">
+      <Card>
         <template #title>
           <div class="section-title">
             <i class="pi pi-info-circle"></i>
@@ -103,27 +106,27 @@
         <template #content>
           <div class="space-y-2">
             <div class="info-row">
-              <span class="text-xs text-slate-400">版本</span>
-              <span class="text-xs font-medium text-slate-700 dark:text-slate-200">v1.0.0</span>
+              <span class="text-xs text-[var(--text-tertiary)]">版本</span>
+              <span class="text-xs font-medium text-[var(--text-primary)]">v1.0.0</span>
             </div>
             <div class="info-row">
-              <span class="text-xs text-slate-400">技术栈</span>
-              <span class="text-xs font-medium text-slate-700 dark:text-slate-200">Go + Vue3 + PrimeVue</span>
+              <span class="text-xs text-[var(--text-tertiary)]">技术栈</span>
+              <span class="text-xs font-medium text-[var(--text-primary)]">Go + Vue3 + PrimeVue</span>
             </div>
             <div class="info-row">
-              <span class="text-xs text-slate-400">数据库</span>
-              <span class="text-xs font-medium text-slate-700 dark:text-slate-200">SQLite3</span>
+              <span class="text-xs text-[var(--text-tertiary)]">数据库</span>
+              <span class="text-xs font-medium text-[var(--text-primary)]">SQLite3</span>
             </div>
             <div class="info-row">
-              <span class="text-xs text-slate-400">框架</span>
-              <span class="text-xs font-medium text-slate-700 dark:text-slate-200">Gin + GORM</span>
+              <span class="text-xs text-[var(--text-tertiary)]">框架</span>
+              <span class="text-xs font-medium text-[var(--text-primary)]">Gin + GORM</span>
             </div>
           </div>
         </template>
       </Card>
 
       <!-- Quick Links -->
-      <Card class="shadow-none">
+      <Card>
         <template #title>
           <div class="section-title">
             <i class="pi pi-directions"></i>
@@ -134,31 +137,31 @@
           <div class="space-y-2">
             <div class="info-row cursor-pointer group" @click="$router.push('/admin/users')">
               <div class="flex items-center gap-2">
-                <i class="pi pi-users text-indigo-400 text-xs"></i>
-                <span class="text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-indigo-500 transition-colors">用户管理</span>
+                <i class="pi pi-users text-[var(--primary)] text-xs"></i>
+                <span class="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--primary)] transition-colors">用户管理</span>
               </div>
-              <i class="pi pi-chevron-right text-slate-300 text-[10px]"></i>
+              <i class="pi pi-chevron-right text-[var(--text-tertiary)] text-[10px]"></i>
             </div>
             <div class="info-row cursor-pointer group" @click="$router.push('/admin/companies')">
               <div class="flex items-center gap-2">
-                <i class="pi pi-building text-indigo-400 text-xs"></i>
-                <span class="text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-indigo-500 transition-colors">企业管理</span>
+                <i class="pi pi-building text-[var(--primary)] text-xs"></i>
+                <span class="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--primary)] transition-colors">企业管理</span>
               </div>
-              <i class="pi pi-chevron-right text-slate-300 text-[10px]"></i>
+              <i class="pi pi-chevron-right text-[var(--text-tertiary)] text-[10px]"></i>
             </div>
             <div class="info-row cursor-pointer group" @click="$router.push('/challenges')">
               <div class="flex items-center gap-2">
-                <i class="pi pi-flag text-indigo-400 text-xs"></i>
-                <span class="text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-indigo-500 transition-colors">漏洞挑战</span>
+                <i class="pi pi-flag text-[var(--primary)] text-xs"></i>
+                <span class="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--primary)] transition-colors">漏洞挑战</span>
               </div>
-              <i class="pi pi-chevron-right text-slate-300 text-[10px]"></i>
+              <i class="pi pi-chevron-right text-[var(--text-tertiary)] text-[10px]"></i>
             </div>
             <div class="info-row cursor-pointer group" @click="$router.push('/audit')">
               <div class="flex items-center gap-2">
-                <i class="pi pi-history text-indigo-400 text-xs"></i>
-                <span class="text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-indigo-500 transition-colors">审计日志</span>
+                <i class="pi pi-history text-[var(--primary)] text-xs"></i>
+                <span class="text-xs font-medium text-[var(--text-secondary)] group-hover:text-[var(--primary)] transition-colors">审计日志</span>
               </div>
-              <i class="pi pi-chevron-right text-slate-300 text-[10px]"></i>
+              <i class="pi pi-chevron-right text-[var(--text-tertiary)] text-[10px]"></i>
             </div>
           </div>
         </template>
@@ -173,6 +176,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import * as api from '@/api'
+import PageHeader from '@/components/PageHeader.vue'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import ToggleSwitch from 'primevue/toggleswitch'
@@ -205,3 +209,15 @@ function handleReset() {
   })
 }
 </script>
+
+<style scoped>
+@keyframes pulse-danger {
+  0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.3); }
+  70% { box-shadow: 0 0 0 8px rgba(244, 63, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+}
+
+.status-pulse-danger {
+  animation: pulse-danger 2.5s infinite;
+}
+</style>

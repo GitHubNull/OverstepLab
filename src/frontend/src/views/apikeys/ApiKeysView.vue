@@ -1,63 +1,62 @@
 <template>
   <div class="space-y-5">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div class="page-header">
-        <h2>API Key 管理</h2>
-        <p>管理您的 API 访问凭证</p>
-      </div>
-      <Button label="创建 API Key" icon="pi pi-plus" size="small" @click="showCreateDialog = true" />
-    </div>
+    <PageHeader title="API Key 管理" description="管理您的 API 访问凭证">
+      <template #actions>
+        <Button label="创建 API Key" icon="pi pi-plus" size="small" @click="showCreateDialog = true" />
+      </template>
+    </PageHeader>
 
     <!-- API Keys Grid -->
     <div v-if="keys.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      <Card v-for="key in keys" :key="key.id" class="shadow-none hover:shadow-md">
-        <template #content>
-          <div class="space-y-3">
-            <!-- Header -->
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center">
-                  <i class="pi pi-key text-amber-500 text-xs"></i>
-                </div>
-                <span class="font-semibold text-sm text-slate-700 dark:text-white">{{ key.name }}</span>
+      <div
+        v-for="key in keys"
+        :key="key.id"
+        class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl overflow-hidden transition-all duration-200 hover:border-[var(--border-strong)]"
+      >
+        <div class="p-4 space-y-3">
+          <!-- Header -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-[var(--warning-subtle)] rounded-lg flex items-center justify-center">
+                <i class="pi pi-key text-[var(--warning)] text-xs"></i>
               </div>
-              <Tag :value="key.status === 'active' ? '正常' : '已吊销'" :severity="key.status === 'active' ? 'success' : 'danger'" class="text-[10px]" />
+              <span class="font-semibold text-sm text-[var(--text-primary)]">{{ key.name }}</span>
             </div>
+            <Tag :value="key.status === 'active' ? '正常' : '已吊销'" :severity="key.status === 'active' ? 'success' : 'danger'" class="text-[10px]" />
+          </div>
 
-            <!-- Details -->
-            <div class="space-y-2">
-              <div class="info-row !py-1.5">
-                <span class="text-[10px] text-slate-400">Key 前缀</span>
-                <code class="text-xs bg-slate-50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded font-mono">{{ key.key_prefix }}****</code>
-              </div>
-              <div class="info-row !py-1.5">
-                <span class="text-[10px] text-slate-400">权限</span>
-                <span class="text-xs text-slate-600 dark:text-slate-300">{{ key.permissions }}</span>
-              </div>
-              <div class="info-row !py-1.5">
-                <span class="text-[10px] text-slate-400">创建时间</span>
-                <span class="text-xs text-slate-400">{{ formatDate(key.created_at) }}</span>
-              </div>
+          <!-- Details -->
+          <div class="space-y-2">
+            <div class="info-row !py-1.5">
+              <span class="text-[10px] text-[var(--text-tertiary)]">Key 前缀</span>
+              <code class="text-xs bg-[var(--bg-base)] px-1.5 py-0.5 rounded mono text-[var(--text-secondary)]">{{ key.key_prefix }}****</code>
             </div>
-
-            <!-- Actions -->
-            <div class="flex gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/50">
-              <Button label="复制" icon="pi pi-copy" text size="small" class="flex-1 !text-xs" @click="handleCopy(key)" />
-              <Button label="删除" icon="pi pi-trash" text size="small" severity="danger" class="flex-1 !text-xs" @click="handleDelete(key)" />
+            <div class="info-row !py-1.5">
+              <span class="text-[10px] text-[var(--text-tertiary)]">权限</span>
+              <span class="text-xs text-[var(--text-secondary)]">{{ key.permissions }}</span>
+            </div>
+            <div class="info-row !py-1.5">
+              <span class="text-[10px] text-[var(--text-tertiary)]">创建时间</span>
+              <span class="text-xs text-[var(--text-tertiary)]">{{ formatDate(key.created_at) }}</span>
             </div>
           </div>
-        </template>
-      </Card>
+
+          <!-- Actions -->
+          <div class="flex gap-2 pt-1 border-t border-[var(--border-default)]">
+            <Button label="复制" icon="pi pi-copy" text size="small" class="flex-1 !text-xs" @click="handleCopy(key)" />
+            <Button label="删除" icon="pi pi-trash" text size="small" severity="danger" class="flex-1 !text-xs" @click="handleDelete(key)" />
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Empty State -->
     <div v-else class="empty-state">
       <div class="empty-state-icon">
-        <i class="pi pi-key text-3xl text-slate-300"></i>
+        <i class="pi pi-key text-3xl text-[var(--text-tertiary)]"></i>
       </div>
-      <h3 class="text-base font-semibold text-slate-600 dark:text-slate-300 mb-1">暂无 API Key</h3>
-      <p class="text-slate-400 text-sm mb-4">创建 API Key 以访问平台 API</p>
+      <h3 class="text-base font-semibold text-[var(--text-secondary)] mb-1">暂无 API Key</h3>
+      <p class="text-[var(--text-tertiary)] text-sm mb-4">创建 API Key 以访问平台 API</p>
       <Button label="创建 API Key" icon="pi pi-plus" size="small" @click="showCreateDialog = true" />
     </div>
 
@@ -65,11 +64,11 @@
     <Dialog v-model:visible="showCreateDialog" header="创建 API Key" modal :style="{ width: '420px' }">
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">名称</label>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">名称</label>
           <InputText v-model="createForm.name" class="w-full" placeholder="例如: my-api-key" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">权限</label>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">权限</label>
           <Select v-model="createForm.permissions" :options="permissionOptions" placeholder="选择权限" class="w-full" />
         </div>
       </div>
@@ -82,10 +81,10 @@
     <!-- New Key Display Dialog -->
     <Dialog v-model:visible="showNewKeyDialog" header="API Key 已创建" modal :style="{ width: '480px' }">
       <div class="space-y-3">
-        <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl p-4">
-          <p class="text-xs text-amber-600 dark:text-amber-400 font-semibold mb-2">请立即复制此 Key，关闭后将无法再次查看！</p>
+        <div class="bg-[var(--warning-subtle)] border border-[var(--warning)]/20 rounded-xl p-4">
+          <p class="text-xs text-[var(--warning)] font-semibold mb-2">请立即复制此 Key，关闭后将无法再次查看！</p>
           <div class="flex items-center gap-2">
-            <code class="flex-1 text-xs bg-white dark:bg-slate-800 px-3 py-2 rounded-lg break-all font-mono">{{ newKeyValue }}</code>
+            <code class="flex-1 text-xs bg-[var(--bg-surface)] px-3 py-2 rounded-lg break-all mono text-[var(--text-primary)]">{{ newKeyValue }}</code>
             <Button icon="pi pi-copy" text size="small" @click="copyToClipboard(newKeyValue)" />
           </div>
         </div>
@@ -101,7 +100,6 @@
 import { ref, onMounted } from 'vue'
 import * as api from '@/api'
 import type { APIKey } from '@/types'
-import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -110,6 +108,7 @@ import Select from 'primevue/select'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import { formatDate } from '@/utils/date'
+import PageHeader from '@/components/PageHeader.vue'
 
 const toast = useToast()
 const confirm = useConfirm()

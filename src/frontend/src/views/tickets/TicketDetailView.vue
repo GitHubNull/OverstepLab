@@ -2,14 +2,14 @@
   <div v-if="ticket" class="space-y-5">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div class="flex items-center gap-2">
-        <Button icon="pi pi-arrow-left" text rounded size="small" class="text-slate-400" @click="$router.push('/tickets')" />
+      <div class="flex items-center gap-3">
+        <Button icon="pi pi-arrow-left" text rounded size="small" class="text-[var(--text-tertiary)]" @click="$router.push('/tickets')" />
         <div>
           <div class="flex items-center gap-2">
-            <h2 class="text-lg font-bold text-slate-800 dark:text-white">{{ ticket.title }}</h2>
+            <h1 class="text-lg font-bold text-[var(--text-primary)]">{{ ticket.title }}</h1>
             <Tag :value="getStatusText(ticket.status)" :severity="getStatusSeverity(ticket.status)" class="text-[10px]" />
           </div>
-          <p class="text-xs text-slate-400 mt-0.5">创建于 {{ formatDate(ticket.created_at) }}</p>
+          <p class="text-xs text-[var(--text-tertiary)] mt-0.5">创建于 {{ formatDate(ticket.created_at) }}</p>
         </div>
       </div>
       <Button
@@ -24,67 +24,67 @@
     </div>
 
     <!-- Original Content -->
-    <Card class="shadow-none">
-      <template #content>
-        <div class="flex gap-3">
-          <Avatar
-            :label="(ticket as any).user?.username?.charAt(0).toUpperCase() || 'U'"
-            shape="circle"
-            class="bg-indigo-100 text-indigo-600 text-xs flex-shrink-0"
-          />
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 mb-1.5">
-              <span class="font-semibold text-sm text-slate-700 dark:text-white">{{ (ticket as any).user?.username || '用户' }}</span>
-              <span class="text-[10px] text-slate-400">{{ formatDate(ticket.created_at) }}</span>
-            </div>
-            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{{ ticket.content }}</p>
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl p-5">
+      <div class="flex gap-3">
+        <Avatar
+          :label="(ticket as any).user?.username?.charAt(0).toUpperCase() || 'U'"
+          shape="circle"
+          class="bg-[var(--primary-subtle)] text-[var(--primary)] text-xs flex-shrink-0"
+        />
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="font-semibold text-sm text-[var(--text-primary)]">{{ (ticket as any).user?.username || '用户' }}</span>
+            <span class="text-[10px] text-[var(--text-tertiary)]">{{ formatDate(ticket.created_at) }}</span>
           </div>
+          <p class="text-sm text-[var(--text-secondary)] leading-relaxed">{{ ticket.content }}</p>
         </div>
-      </template>
-    </Card>
+      </div>
+    </div>
 
     <!-- Replies -->
     <div v-if="replies.length > 0" class="space-y-3">
-      <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">回复 ({{ replies.length }})</h3>
+      <h3 class="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">回复 ({{ replies.length }})</h3>
 
-      <Card v-for="reply in replies" :key="reply.id" class="shadow-none">
-        <template #content>
-          <div class="flex gap-3">
-            <Avatar
-              :label="reply.user?.username?.charAt(0).toUpperCase() || 'U'"
-              shape="circle"
-              :class="reply.user?.user_type === 'platform_admin' ? 'bg-red-100 text-red-600 text-xs' : 'bg-indigo-100 text-indigo-600 text-xs'"
-            />
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 mb-1.5">
-                <span class="font-semibold text-sm text-slate-700 dark:text-white">{{ reply.user?.username || '用户' }}</span>
-                <Tag v-if="reply.user?.user_type === 'platform_admin'" value="管理员" severity="danger" class="text-[10px]" />
-                <span class="text-[10px] text-slate-400">{{ formatDate(reply.created_at) }}</span>
-              </div>
-              <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{{ reply.content }}</p>
+      <div
+        v-for="reply in replies"
+        :key="reply.id"
+        class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl p-5 relative"
+        :class="reply.user?.user_type === 'platform_admin' ? 'border-l-[3px]' : ''"
+        :style="reply.user?.user_type === 'platform_admin' ? { borderLeftColor: 'var(--danger)' } : {}"
+      >
+        <div class="flex gap-3">
+          <Avatar
+            :label="reply.user?.username?.charAt(0).toUpperCase() || 'U'"
+            shape="circle"
+            :class="reply.user?.user_type === 'platform_admin' ? 'bg-[var(--danger-subtle)] text-[var(--danger)] text-xs' : 'bg-[var(--primary-subtle)] text-[var(--primary)] text-xs'"
+          />
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="font-semibold text-sm text-[var(--text-primary)]">{{ reply.user?.username || '用户' }}</span>
+              <Tag v-if="reply.user?.user_type === 'platform_admin'" value="管理员" severity="danger" class="text-[10px]" />
+              <span class="text-[10px] text-[var(--text-tertiary)]">{{ formatDate(reply.created_at) }}</span>
             </div>
+            <p class="text-sm text-[var(--text-secondary)] leading-relaxed">{{ reply.content }}</p>
           </div>
-        </template>
-      </Card>
+        </div>
+      </div>
     </div>
 
     <!-- Reply Form -->
-    <Card v-if="ticket.status !== 'closed'" class="shadow-none">
-      <template #title>
+    <div v-if="ticket.status !== 'closed'" class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-[var(--border-default)]">
         <div class="section-title">
           <i class="pi pi-reply"></i>
           <span>回复工单</span>
         </div>
-      </template>
-      <template #content>
-        <div class="space-y-3">
-          <Textarea v-model="replyContent" rows="4" placeholder="请输入回复内容..." class="w-full" />
-          <div class="flex justify-end">
-            <Button label="提交回复" icon="pi pi-send" size="small" :loading="submitting" @click="submitReply" />
-          </div>
+      </div>
+      <div class="p-4 space-y-3">
+        <Textarea v-model="replyContent" rows="4" placeholder="请输入回复内容..." class="w-full" />
+        <div class="flex justify-end">
+          <Button label="提交回复" icon="pi pi-send" size="small" :loading="submitting" @click="submitReply" />
         </div>
-      </template>
-    </Card>
+      </div>
+    </div>
   </div>
 
   <!-- Loading -->
@@ -98,7 +98,6 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import * as api from '@/api'
 import type { Ticket, TicketReply } from '@/types'
-import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'

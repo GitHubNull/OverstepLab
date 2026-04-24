@@ -1,75 +1,32 @@
 <template>
   <div class="space-y-5">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div class="page-header">
-        <h2>账单管理</h2>
-        <p>查看您的消费记录和账户余额</p>
-      </div>
-      <div class="flex gap-2">
+    <PageHeader title="账单管理" description="查看您的消费记录和账户余额">
+      <template #actions>
         <Button label="充值" icon="pi pi-plus" size="small" @click="showRechargeDialog = true" />
         <Button label="导出" icon="pi pi-download" size="small" severity="secondary" outlined @click="handleExport" />
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- Stats -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-      <Card class="shadow-none stat-card stat-card-green">
-        <template #content>
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <i class="pi pi-wallet text-emerald-500"></i>
-            </div>
-            <div>
-              <p class="text-[11px] text-slate-400 font-medium">账户余额</p>
-              <p class="text-xl font-bold text-slate-800 dark:text-white">¥{{ balance.toFixed(2) }}</p>
-            </div>
-          </div>
-        </template>
-      </Card>
-
-      <Card class="shadow-none stat-card stat-card-red">
-        <template #content>
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-red-50 dark:bg-red-900/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <i class="pi pi-arrow-down text-red-500"></i>
-            </div>
-            <div>
-              <p class="text-[11px] text-slate-400 font-medium">总支出</p>
-              <p class="text-xl font-bold text-red-500">¥{{ totalExpense.toFixed(2) }}</p>
-            </div>
-          </div>
-        </template>
-      </Card>
-
-      <Card class="shadow-none stat-card stat-card-blue">
-        <template #content>
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center flex-shrink-0">
-              <i class="pi pi-receipt text-blue-500"></i>
-            </div>
-            <div>
-              <p class="text-[11px] text-slate-400 font-medium">账单数量</p>
-              <p class="text-xl font-bold text-slate-800 dark:text-white">{{ bills.length }}</p>
-            </div>
-          </div>
-        </template>
-      </Card>
+      <StatCard color="#10b981" icon="pi pi-wallet" :value="`¥${balance.toFixed(2)}`" label="账户余额" />
+      <StatCard color="#f43f5e" icon="pi pi-arrow-down" :value="`¥${totalExpense.toFixed(2)}`" label="总支出" />
+      <StatCard color="#3b82f6" icon="pi pi-receipt" :value="bills.length" label="账单数量" />
     </div>
 
     <!-- Bills Table -->
-    <Card class="shadow-none">
-      <template #title>
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-[var(--border-default)]">
         <div class="section-title">
           <i class="pi pi-list"></i>
           <span>账单明细</span>
         </div>
-      </template>
-      <template #content>
-        <DataTable :value="bills" stripedRows class="p-datatable-sm" :rows="10" paginator>
+      </div>
+      <div class="p-0">
+        <DataTable :value="bills" class="p-datatable-sm" :rows="10" paginator>
           <Column field="id" header="账单号">
             <template #body="{ data }">
-              <code class="text-xs bg-slate-50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded text-slate-500">#{{ data.id }}</code>
+              <code class="text-xs bg-[var(--bg-base)] px-1.5 py-0.5 rounded text-[var(--text-tertiary)] mono">#{{ data.id }}</code>
             </template>
           </Column>
           <Column field="type" header="类型">
@@ -79,32 +36,34 @@
           </Column>
           <Column field="amount" header="金额">
             <template #body="{ data }">
-              <span class="font-semibold text-sm" :class="data.amount > 0 ? 'text-emerald-600' : 'text-red-500'">
+              <span class="font-semibold text-sm mono text-right block" :class="data.amount > 0 ? 'text-[var(--success)]' : 'text-[var(--danger)]'">
                 {{ data.amount > 0 ? '+' : '' }}¥{{ data.amount.toFixed(2) }}
               </span>
             </template>
           </Column>
           <Column field="description" header="描述">
             <template #body="{ data }">
-              <span class="text-sm text-slate-500">{{ data.description }}</span>
+              <span class="text-sm text-[var(--text-secondary)]">{{ data.description }}</span>
             </template>
           </Column>
           <Column header="时间">
             <template #body="{ data }">
-              <span class="text-xs text-slate-400">{{ formatDate(data.created_at) }}</span>
+              <span class="text-xs text-[var(--text-tertiary)]">{{ formatDate(data.created_at) }}</span>
             </template>
           </Column>
         </DataTable>
-      </template>
-    </Card>
+      </div>
+    </div>
 
     <!-- Recharge Dialog -->
     <Dialog v-model:visible="showRechargeDialog" header="余额充值" modal :style="{ width: '400px' }">
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wider">充值金额</label>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-2 uppercase tracking-wider">充值金额</label>
           <div class="grid grid-cols-3 gap-2 mb-3">
-            <Button v-for="amount in [50, 100, 200, 500, 1000, 2000]" :key="amount"
+            <Button
+              v-for="amount in [50, 100, 200, 500, 1000, 2000]"
+              :key="amount"
               :label="'¥' + amount"
               :severity="rechargeAmount === amount ? 'primary' : 'secondary'"
               :outlined="rechargeAmount !== amount"
@@ -128,7 +87,6 @@
 import { ref, computed, onMounted } from 'vue'
 import * as api from '@/api'
 import type { Bill } from '@/types'
-import Card from 'primevue/card'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Tag from 'primevue/tag'
@@ -137,6 +95,8 @@ import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import { useToast } from 'primevue/usetoast'
 import { formatDate } from '@/utils/date'
+import StatCard from '@/components/StatCard.vue'
+import PageHeader from '@/components/PageHeader.vue'
 
 const toast = useToast()
 const bills = ref<Bill[]>([])

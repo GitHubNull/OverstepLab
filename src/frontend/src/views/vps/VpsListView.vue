@@ -1,161 +1,127 @@
 <template>
-  <div class="space-y-5">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div class="page-header">
-        <h2>VPS 管理</h2>
-        <p>管理您的虚拟服务器实例</p>
-      </div>
-      <Button
-        label="购买 VPS"
-        icon="pi pi-plus"
-        size="small"
-        @click="showCreateDialog = true"
-      />
-    </div>
+  <div>
+    <PageHeader title="VPS 管理" description="管理您的虚拟服务器实例">
+      <template #actions>
+        <Button label="购买 VPS" icon="pi pi-plus" size="small" @click="showCreateDialog = true" />
+      </template>
+    </PageHeader>
 
     <!-- VPS Cards -->
-    <div v-if="vpsStore.vpsList.length > 0" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      <Card
+    <div v-if="vpsStore.vpsList.length > 0" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div
         v-for="vps in vpsStore.vpsList"
         :key="vps.id"
-        class="shadow-none hover:shadow-md group"
+        class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl overflow-hidden transition-all duration-200 hover:border-[var(--border-strong)] hover:shadow-sm"
       >
-        <template #content>
-          <div class="space-y-3.5">
-            <!-- Header -->
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <div
-                  class="w-9 h-9 rounded-lg flex items-center justify-center"
-                  :class="vps.status === 'running' ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-red-50 dark:bg-red-900/20'"
+        <div class="p-5">
+          <!-- Header: Name + Status -->
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-xl flex items-center justify-center"
+                :style="{ backgroundColor: vps.status === 'running' ? 'var(--success-subtle)' : 'var(--danger-subtle)' }"
+              >
+                <i
+                  class="pi pi-server text-base"
+                  :style="{ color: vps.status === 'running' ? 'var(--success)' : 'var(--danger)' }"
+                ></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-[15px] text-[var(--text-primary)] leading-tight">{{ vps.name }}</h3>
+                <span
+                  class="inline-flex items-center gap-1 mt-0.5 text-[11px] font-medium"
+                  :style="{ color: vps.status === 'running' ? 'var(--success)' : 'var(--danger)' }"
                 >
-                  <i
-                    class="pi pi-server text-sm"
-                    :class="vps.status === 'running' ? 'text-emerald-500' : 'text-red-400'"
-                  ></i>
-                </div>
-                <div>
-                  <h3 class="font-semibold text-sm text-slate-800 dark:text-white">{{ vps.name }}</h3>
-                  <Tag
-                    :severity="vps.status === 'running' ? 'success' : 'danger'"
-                    :value="vps.status === 'running' ? '运行中' : '已停止'"
-                    class="text-[10px]"
-                  />
-                </div>
+                  <span class="w-1.5 h-1.5 rounded-full" :style="{ backgroundColor: vps.status === 'running' ? 'var(--success)' : 'var(--danger)' }"></span>
+                  {{ vps.status === 'running' ? '运行中' : '已停止' }}
+                </span>
               </div>
-            </div>
-
-            <!-- IP Address -->
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400">IP 地址</span>
-              <code class="bg-slate-50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300 font-mono">{{ vps.ip_address }}</code>
-            </div>
-
-            <!-- Specs -->
-            <div class="grid grid-cols-3 gap-2">
-              <div class="spec-box !py-2">
-                <i class="pi pi-microchip text-slate-300 text-xs"></i>
-                <p class="text-base font-bold text-slate-700 dark:text-white mt-0.5">{{ vps.cpu }}</p>
-                <p class="text-[10px] text-slate-400">核 CPU</p>
-              </div>
-              <div class="spec-box !py-2">
-                <i class="pi pi-database text-slate-300 text-xs"></i>
-                <p class="text-base font-bold text-slate-700 dark:text-white mt-0.5">{{ vps.memory }}</p>
-                <p class="text-[10px] text-slate-400">MB 内存</p>
-              </div>
-              <div class="spec-box !py-2">
-                <i class="pi pi-hdd text-slate-300 text-xs"></i>
-                <p class="text-base font-bold text-slate-700 dark:text-white mt-0.5">{{ vps.disk }}</p>
-                <p class="text-[10px] text-slate-400">GB 磁盘</p>
-              </div>
-            </div>
-
-            <!-- OS -->
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400">操作系统</span>
-              <span class="text-slate-600 dark:text-slate-300 flex items-center gap-1">
-                <i class="pi pi-desktop text-slate-300 text-[10px]"></i>
-                {{ vps.os_image }}
-              </span>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/50">
-              <Button
-                label="详情"
-                icon="pi pi-eye"
-                text
-                size="small"
-                class="flex-1 !text-xs"
-                @click="$router.push(`/vps/${vps.id}`)"
-              />
-              <Button
-                v-if="vps.status === 'stopped'"
-                label="启动"
-                icon="pi pi-play"
-                severity="success"
-                size="small"
-                class="flex-1 !text-xs"
-                @click="handleStart(vps.id)"
-              />
-              <Button
-                v-if="vps.status === 'running'"
-                label="停止"
-                icon="pi pi-stop"
-                severity="warn"
-                size="small"
-                class="flex-1 !text-xs"
-                @click="handleStop(vps.id)"
-              />
             </div>
           </div>
-        </template>
-      </Card>
+
+          <!-- IP -->
+          <div class="flex items-center justify-between py-2.5 border-t border-[var(--border-subtle)]">
+            <span class="text-[12px] text-[var(--text-tertiary)]">IP 地址</span>
+            <code class="text-[12px] text-[var(--text-primary)] mono font-medium">{{ vps.ip_address }}</code>
+          </div>
+
+          <!-- Specs Row -->
+          <div class="grid grid-cols-3 gap-3 py-3">
+            <div class="text-center">
+              <p class="text-lg font-bold text-[var(--text-primary)] mono leading-none">{{ vps.cpu }}</p>
+              <p class="text-[11px] text-[var(--text-tertiary)] mt-1">CPU 核心</p>
+            </div>
+            <div class="text-center border-x border-[var(--border-subtle)]">
+              <p class="text-lg font-bold text-[var(--text-primary)] mono leading-none">{{ vps.memory }}</p>
+              <p class="text-[11px] text-[var(--text-tertiary)] mt-1">MB 内存</p>
+            </div>
+            <div class="text-center">
+              <p class="text-lg font-bold text-[var(--text-primary)] mono leading-none">{{ vps.disk }}</p>
+              <p class="text-[11px] text-[var(--text-tertiary)] mt-1">GB 磁盘</p>
+            </div>
+          </div>
+
+          <!-- OS -->
+          <div class="flex items-center justify-between py-2.5 border-t border-[var(--border-subtle)]">
+            <span class="text-[12px] text-[var(--text-tertiary)]">操作系统</span>
+            <span class="text-[12px] text-[var(--text-secondary)] font-medium">{{ vps.os_image }}</span>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2 mt-4 pt-3 border-t border-[var(--border-default)]">
+            <Button label="详情" icon="pi pi-eye" text size="small" class="flex-1" @click="$router.push(`/vps/${vps.id}`)" />
+            <Button
+              v-if="vps.status === 'stopped'"
+              label="启动" icon="pi pi-play" severity="success" size="small" class="flex-1"
+              @click="handleStart(vps.id)"
+            />
+            <Button
+              v-if="vps.status === 'running'"
+              label="停止" icon="pi pi-stop" severity="warn" size="small" class="flex-1"
+              @click="handleStop(vps.id)"
+            />
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Empty State -->
     <div v-else-if="!vpsStore.loading" class="empty-state">
       <div class="empty-state-icon">
-        <i class="pi pi-server text-3xl text-slate-300"></i>
+        <i class="pi pi-server text-3xl text-[var(--text-tertiary)]"></i>
       </div>
-      <h3 class="text-base font-semibold text-slate-600 dark:text-slate-300 mb-1">暂无 VPS 实例</h3>
-      <p class="text-slate-400 text-sm mb-4">点击上方按钮购买您的第一个 VPS</p>
+      <h3 class="text-base font-semibold text-[var(--text-secondary)] mb-1">暂无 VPS 实例</h3>
+      <p class="text-[var(--text-tertiary)] text-sm mb-4">点击上方按钮购买您的第一个 VPS</p>
       <Button label="购买 VPS" icon="pi pi-plus" size="small" @click="showCreateDialog = true" />
     </div>
 
     <!-- Create VPS Dialog -->
-    <Dialog
-      v-model:visible="showCreateDialog"
-      header="购买 VPS"
-      modal
-      :style="{ width: '450px' }"
-    >
+    <Dialog v-model:visible="showCreateDialog" header="购买 VPS" modal :style="{ width: '450px' }">
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">实例名称</label>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">实例名称</label>
           <InputText v-model="createForm.name" class="w-full" placeholder="例如: my-web-server" />
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">CPU (核)</label>
+            <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">CPU (核)</label>
             <Select v-model="createForm.cpu" :options="cpuOptions" placeholder="选择" class="w-full" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">内存 (MB)</label>
+            <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">内存 (MB)</label>
             <Select v-model="createForm.memory" :options="memoryOptions" placeholder="选择" class="w-full" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">磁盘 (GB)</label>
+            <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">磁盘 (GB)</label>
             <Select v-model="createForm.disk" :options="diskOptions" placeholder="选择" class="w-full" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">带宽 (Mbps)</label>
+            <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">带宽 (Mbps)</label>
             <Select v-model="createForm.bandwidth" :options="bandwidthOptions" placeholder="选择" class="w-full" />
           </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">操作系统</label>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">操作系统</label>
           <Select v-model="createForm.os_image" :options="osOptions" placeholder="选择操作系统" class="w-full" />
         </div>
       </div>
@@ -171,12 +137,11 @@
 import { onMounted, ref } from 'vue'
 import { useVpsStore } from '@/stores/vps'
 import { useToast } from 'primevue/usetoast'
-import Card from 'primevue/card'
-import Tag from 'primevue/tag'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import PageHeader from '@/components/PageHeader.vue'
 
 const vpsStore = useVpsStore()
 const toast = useToast()

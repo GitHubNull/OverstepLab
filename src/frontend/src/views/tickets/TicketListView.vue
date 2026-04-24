@@ -1,23 +1,19 @@
 <template>
   <div class="space-y-5">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div class="page-header">
-        <h2>工单系统</h2>
-        <p>提交和管理技术支持请求</p>
-      </div>
-      <Button label="新建工单" icon="pi pi-plus" size="small" @click="showCreateDialog = true" />
-    </div>
+    <PageHeader title="工单系统" description="提交和管理技术支持请求">
+      <template #actions>
+        <Button label="新建工单" icon="pi pi-plus" size="small" @click="showCreateDialog = true" />
+      </template>
+    </PageHeader>
 
-    <!-- Tickets List -->
-    <Card class="shadow-none">
-      <template #content>
-        <DataTable :value="tickets" stripedRows class="p-datatable-sm" :rows="10" paginator>
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl overflow-hidden">
+      <div class="p-0">
+        <DataTable :value="tickets" class="p-datatable-sm" :rows="10" paginator>
           <Column field="title" header="标题">
             <template #body="{ data }">
               <div class="flex items-center gap-2">
                 <i class="pi text-xs" :class="getStatusIcon(data.status)"></i>
-                <span class="font-medium text-sm text-slate-700 dark:text-slate-200">{{ data.title }}</span>
+                <span class="font-medium text-sm text-[var(--text-primary)]">{{ data.title }}</span>
               </div>
             </template>
           </Column>
@@ -28,7 +24,7 @@
           </Column>
           <Column header="创建时间">
             <template #body="{ data }">
-              <span class="text-xs text-slate-400">{{ formatDate(data.created_at) }}</span>
+              <span class="text-xs text-[var(--text-tertiary)]">{{ formatDate(data.created_at) }}</span>
             </template>
           </Column>
           <Column header="操作" style="width: 80px">
@@ -37,18 +33,18 @@
             </template>
           </Column>
         </DataTable>
-      </template>
-    </Card>
+      </div>
+    </div>
 
     <!-- Create Ticket Dialog -->
     <Dialog v-model:visible="showCreateDialog" header="新建工单" modal :style="{ width: '500px' }">
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">标题</label>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">标题</label>
           <InputText v-model="createForm.title" class="w-full" placeholder="请简述您的问题" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">内容</label>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">内容</label>
           <Textarea v-model="createForm.content" rows="5" class="w-full" placeholder="请详细描述您遇到的问题..." />
         </div>
       </div>
@@ -64,7 +60,6 @@
 import { ref, onMounted } from 'vue'
 import * as api from '@/api'
 import type { Ticket } from '@/types'
-import Card from 'primevue/card'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Tag from 'primevue/tag'
@@ -74,6 +69,7 @@ import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import { useToast } from 'primevue/usetoast'
 import { formatDate } from '@/utils/date'
+import PageHeader from '@/components/PageHeader.vue'
 
 const toast = useToast()
 const tickets = ref<Ticket[]>([])
@@ -119,9 +115,9 @@ function getStatusSeverity(status: string) {
 
 function getStatusIcon(status: string) {
   const map: Record<string, string> = {
-    open: 'pi-envelope text-amber-500',
-    replied: 'pi-envelope-open text-blue-500',
-    closed: 'pi-check-circle text-slate-400',
+    open: 'pi-envelope text-[var(--warning)]',
+    replied: 'pi-envelope-open text-[var(--info)]',
+    closed: 'pi-check-circle text-[var(--text-tertiary)]',
   }
   return map[status] || 'pi-envelope'
 }

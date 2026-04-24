@@ -1,91 +1,116 @@
 <template>
   <div class="space-y-5">
-    <!-- Header -->
+    <!-- Header with progress -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div class="page-header">
-        <h2>漏洞挑战</h2>
-        <p>发现并练习越权漏洞，提升安全测试技能</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg">
-          <i class="pi pi-check-circle text-emerald-500 text-xs"></i>
-          <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{{ completedCount }}/13</span>
+      <PageHeader title="漏洞挑战" description="发现并练习越权漏洞，提升安全测试技能" />
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 px-3 py-1.5 bg-[var(--success-subtle)] border border-[var(--success)]/20 rounded-lg">
+          <i class="pi pi-check-circle text-[var(--success)] text-xs"></i>
+          <span class="text-xs font-semibold text-[var(--success)]">{{ completedCount }}/13</span>
         </div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl p-4">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-medium text-[var(--text-secondary)]">总体进度</span>
+        <span class="text-xs font-bold text-[var(--primary)] mono">{{ Math.round((completedCount / 13) * 100) }}%</span>
+      </div>
+      <div class="h-2 bg-[var(--bg-base)] rounded-full overflow-hidden">
+        <div
+          class="h-full bg-[var(--primary)] rounded-full transition-all duration-500"
+          :style="{ width: `${(completedCount / 13) * 100}%` }"
+        ></div>
       </div>
     </div>
 
     <!-- Category Filters -->
     <div class="flex gap-2 flex-wrap">
-      <Button
+      <button
         v-for="cat in categories"
         :key="cat.value"
-        :label="cat.label"
-        :severity="selectedCategory === cat.value ? 'primary' : 'secondary'"
-        :outlined="selectedCategory !== cat.value"
-        size="small"
+        class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 border"
+        :class="selectedCategory === cat.value
+          ? 'bg-[var(--primary-subtle)] border-[var(--primary)]/30 text-[var(--primary)]'
+          : 'bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--border-strong)]'"
         @click="selectedCategory = cat.value"
-      />
+      >
+        {{ cat.label }}
+      </button>
     </div>
 
     <!-- Challenges Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      <Card
+      <div
         v-for="ch in filteredChallenges"
         :key="ch.id"
-        class="shadow-none hover:shadow-md"
-        :class="{ 'ring-2 ring-emerald-400/50': ch.completed }"
+        class="bg-[var(--bg-surface)] border rounded-xl overflow-hidden transition-all duration-200 hover:border-[var(--border-strong)] relative"
+        :class="ch.completed ? 'border-[var(--success)]/30' : 'border-[var(--border-default)]'"
       >
-        <template #content>
-          <div class="space-y-3">
-            <!-- Header -->
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="font-mono text-xs font-bold text-slate-400">{{ ch.id }}</span>
-                <Tag :severity="getCategorySeverity(ch.category)" :value="ch.category" class="text-[10px]" />
-              </div>
-              <i v-if="ch.completed" class="pi pi-check-circle text-emerald-500"></i>
-            </div>
-
-            <!-- Title -->
-            <h3 class="font-semibold text-sm text-slate-700 dark:text-white">{{ ch.title }}</h3>
-
-            <!-- Description -->
-            <p class="text-xs text-slate-500 leading-relaxed">{{ ch.description }}</p>
-
-            <!-- Difficulty -->
-            <div class="flex items-center gap-1.5">
-              <span class="text-[10px] text-slate-400">难度:</span>
-              <div class="flex gap-0.5">
-                <i v-for="i in 3" :key="i" class="pi text-xs" :class="i <= ch.difficulty ? 'pi-star-fill text-amber-400' : 'pi-star text-slate-200'"></i>
-              </div>
-            </div>
-
-            <!-- Endpoint -->
-            <div class="bg-slate-50 dark:bg-slate-700/30 rounded-lg p-2">
-              <div class="flex items-center gap-2">
-                <Tag :value="(ch as any).method" severity="info" class="text-[10px]" />
-                <code class="text-[10px] text-slate-500 dark:text-slate-400 truncate">{{ (ch as any).endpoint }}</code>
-              </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex gap-2 pt-1">
-              <Button label="提示" icon="pi pi-lightbulb" text size="small" class="flex-1 !text-xs" @click="showHints(ch)" />
-              <Button label="WriteUp" icon="pi pi-book" text size="small" class="flex-1 !text-xs" @click="showWriteup(ch)" />
-              <Button
-                v-if="!ch.completed"
-                label="完成"
-                icon="pi pi-check"
-                text
-                size="small"
-                severity="success"
-                class="!text-xs"
-                @click="markComplete(ch)"
+        <!-- Completed indicator -->
+        <div
+          v-if="ch.completed"
+          class="absolute left-0 top-3 bottom-3 w-[3px] bg-[var(--success)] rounded-r-full"
+        ></div>
+        <div class="p-4 space-y-3" :class="ch.completed ? 'pl-5' : ''">
+          <!-- Header -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="mono text-xs font-bold text-[var(--text-tertiary)]">{{ ch.id }}</span>
+              <Tag
+                :value="ch.category"
+                class="text-[10px]"
+                :style="getCategoryStyle(ch.category)"
               />
             </div>
+            <i v-if="ch.completed" class="pi pi-check-circle text-[var(--success)]"></i>
           </div>
-        </template>
-      </Card>
+
+          <!-- Title -->
+          <h3 class="font-semibold text-sm text-[var(--text-primary)]">{{ ch.title }}</h3>
+
+          <!-- Description -->
+          <p class="text-xs text-[var(--text-secondary)] leading-relaxed">{{ ch.description }}</p>
+
+          <!-- Difficulty -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-[10px] text-[var(--text-tertiary)]">难度:</span>
+            <div class="flex gap-0.5">
+              <i
+                v-for="i in 3"
+                :key="i"
+                class="pi text-xs"
+                :class="i <= ch.difficulty ? 'pi-bolt text-[var(--warning)]' : 'pi-bolt text-[var(--border-default)]'"
+              ></i>
+            </div>
+          </div>
+
+          <!-- Endpoint -->
+          <div class="bg-[var(--bg-base)] rounded-lg p-2.5 border border-[var(--border-subtle)]">
+            <div class="flex items-center gap-2">
+              <code class="text-[10px] px-1.5 py-0.5 rounded bg-[var(--primary-subtle)] text-[var(--primary)] mono font-semibold">{{ (ch as any).method }}</code>
+              <code class="text-[11px] text-[var(--text-secondary)] mono truncate">{{ (ch as any).endpoint }}</code>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-2 pt-1">
+            <Button label="提示" icon="pi pi-lightbulb" text size="small" class="flex-1 !text-xs" @click="showHints(ch)" />
+            <Button label="WriteUp" icon="pi pi-book" text size="small" class="flex-1 !text-xs" @click="showWriteup(ch)" />
+            <Button
+              v-if="!ch.completed"
+              label="完成"
+              icon="pi pi-check"
+              text
+              size="small"
+              severity="success"
+              class="!text-xs"
+              @click="markComplete(ch)"
+            />
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Hint Dialog -->
@@ -95,7 +120,7 @@
           <div class="flex items-center gap-2">
             <Tag :value="`Level ${index + 1}`" severity="warn" class="text-[10px]" />
           </div>
-          <p class="text-sm text-slate-600 dark:text-slate-400 pl-1">{{ hint }}</p>
+          <p class="text-sm text-[var(--text-secondary)] pl-1">{{ hint }}</p>
         </div>
       </div>
     </Dialog>
@@ -103,17 +128,17 @@
     <!-- WriteUp Dialog -->
     <Dialog v-model:visible="writeupDialogVisible" :header="`WriteUp - ${selectedChallenge?.title}`" modal :style="{ width: '600px' }">
       <div v-if="selectedChallenge" class="space-y-4">
-        <div class="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4">
-          <h4 class="font-semibold text-sm text-slate-700 dark:text-white mb-2">漏洞分析</h4>
-          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{{ (selectedChallenge as any).writeup }}</p>
+        <div class="bg-[var(--bg-base)] rounded-xl p-4 border border-[var(--border-default)]">
+          <h4 class="font-semibold text-sm text-[var(--text-primary)] mb-2">漏洞分析</h4>
+          <p class="text-sm text-[var(--text-secondary)] leading-relaxed">{{ (selectedChallenge as any).writeup }}</p>
         </div>
-        <div class="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-4">
-          <h4 class="font-semibold text-sm text-slate-700 dark:text-white mb-2">影响</h4>
-          <p class="text-sm text-slate-600 dark:text-slate-400">该漏洞可能导致未授权访问敏感数据或执行未授权操作。</p>
+        <div class="bg-[var(--bg-base)] rounded-xl p-4 border border-[var(--border-default)]">
+          <h4 class="font-semibold text-sm text-[var(--text-primary)] mb-2">影响</h4>
+          <p class="text-sm text-[var(--text-secondary)]">该漏洞可能导致未授权访问敏感数据或执行未授权操作。</p>
         </div>
-        <div class="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800/30 rounded-xl p-4">
-          <h4 class="font-semibold text-sm text-emerald-700 dark:text-emerald-400 mb-2">修复方案</h4>
-          <p class="text-sm text-slate-600 dark:text-slate-400">在安全模式下，系统会启用完整的权限校验，阻止该漏洞的利用。</p>
+        <div class="bg-[var(--success-subtle)] border border-[var(--success)]/20 rounded-xl p-4">
+          <h4 class="font-semibold text-sm text-[var(--success)] mb-2">修复方案</h4>
+          <p class="text-sm text-[var(--text-secondary)]">在安全模式下，系统会启用完整的权限校验，阻止该漏洞的利用。</p>
         </div>
       </div>
     </Dialog>
@@ -124,11 +149,11 @@
 import { ref, computed, onMounted } from 'vue'
 import * as api from '@/api'
 import type { Challenge } from '@/types'
-import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import { useToast } from 'primevue/usetoast'
+import PageHeader from '@/components/PageHeader.vue'
 
 const toast = useToast()
 const challenges = ref<Challenge[]>([])
@@ -156,10 +181,23 @@ const filteredChallenges = computed(() => {
 
 const completedCount = computed(() => challenges.value.filter(ch => ch.completed).length)
 
-function getCategorySeverity(cat: string) {
-  if (cat.includes('水平')) return 'info'
-  if (cat.includes('垂直')) return 'warn'
-  return 'danger'
+function getCategoryStyle(cat: string) {
+  if (cat.includes('水平')) {
+    return {
+      background: 'var(--info-subtle)',
+      color: 'var(--info)',
+    }
+  }
+  if (cat.includes('垂直')) {
+    return {
+      background: 'var(--warning-subtle)',
+      color: 'var(--warning)',
+    }
+  }
+  return {
+    background: 'var(--danger-subtle)',
+    color: 'var(--danger)',
+  }
 }
 
 function showHints(ch: Challenge) {

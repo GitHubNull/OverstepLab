@@ -7,7 +7,6 @@ import ConfirmationService from 'primevue/confirmationservice'
 import App from './App.vue'
 import router from './router'
 import 'primeicons/primeicons.css'
-import 'primeflex/primeflex.css'
 import './assets/styles/global.css'
 
 const app = createApp(App)
@@ -19,7 +18,7 @@ app.use(PrimeVue, {
   theme: {
     preset: Aura,
     options: {
-      darkModeSelector: '.dark-mode',
+      darkModeSelector: '.dark',
     },
   },
 })
