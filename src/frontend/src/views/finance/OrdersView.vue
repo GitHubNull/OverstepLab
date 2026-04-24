@@ -1,70 +1,44 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-5">
     <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <h2 class="text-2xl font-bold text-slate-800 dark:text-white">订单管理</h2>
-        <p class="text-slate-500">查看您的购买和续费记录</p>
-      </div>
+    <div class="page-header">
+      <h2>订单管理</h2>
+      <p>查看您的购买和续费记录</p>
     </div>
 
     <!-- Orders Table -->
-    <Card class="shadow-sm">
+    <Card class="shadow-none">
       <template #title>
-        <div class="flex items-center gap-2">
-          <i class="pi pi-shopping-cart text-primary-500"></i>
-          <span class="font-bold">订单列表</span>
+        <div class="section-title">
+          <i class="pi pi-receipt"></i>
+          <span>订单列表</span>
         </div>
       </template>
-
       <template #content>
-        <DataTable 
-          :value="orders" 
-          stripedRows
-          class="p-datatable-sm"
-          :rows="10"
-          paginator
-        >
+        <DataTable :value="orders" stripedRows class="p-datatable-sm" :rows="10" paginator>
           <Column field="order_no" header="订单号">
             <template #body="{ data }">
-              <div class="flex items-center gap-2">
-                <i class="pi pi-file text-slate-400"></i>
-                <code class="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">{{ data.order_no }}</code>
-              </div>
+              <code class="text-xs bg-slate-50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300">{{ data.order_no }}</code>
             </template>
           </Column>
-
           <Column field="type" header="类型">
             <template #body="{ data }">
-              <Tag 
-                :value="getTypeText(data.type)"
-                :severity="getTypeSeverity(data.type)"
-                class="text-xs"
-              />
+              <Tag :value="getTypeText(data.type)" :severity="getTypeSeverity(data.type)" class="text-[10px]" />
             </template>
           </Column>
-
           <Column field="amount" header="金额">
             <template #body="{ data }">
-              <span class="font-semibold text-slate-800 dark:text-white">
-                ¥{{ data.amount.toFixed(2) }}
-              </span>
+              <span class="font-semibold text-sm text-slate-700 dark:text-slate-200">¥{{ data.amount.toFixed(2) }}</span>
             </template>
           </Column>
-
           <Column field="status" header="状态">
             <template #body="{ data }">
-              <Tag 
-                :value="getStatusText(data.status)"
-                :severity="getStatusSeverity(data.status)"
-                class="text-xs"
-              />
+              <Tag :value="getStatusText(data.status)" :severity="getStatusSeverity(data.status)" class="text-[10px]" />
             </template>
           </Column>
-
           <Column header="创建时间">
             <template #body="{ data }">
-              <span class="text-sm text-slate-500">{{ formatDate(data.created_at) }}</span>
+              <span class="text-xs text-slate-400">{{ formatDate(data.created_at) }}</span>
             </template>
           </Column>
         </DataTable>
@@ -91,38 +65,22 @@ onMounted(async () => {
 })
 
 function getTypeText(type: string) {
-  const map: Record<string, string> = {
-    purchase: '购买',
-    renew: '续费',
-    upgrade: '升级',
-  }
+  const map: Record<string, string> = { purchase: '购买', renew: '续费', upgrade: '升级' }
   return map[type] || type
 }
 
 function getTypeSeverity(type: string) {
-  const map: Record<string, string> = {
-    purchase: 'primary',
-    renew: 'info',
-    upgrade: 'warning',
-  }
+  const map: Record<string, string> = { purchase: 'primary', renew: 'info', upgrade: 'warn' }
   return map[type] || 'secondary'
 }
 
 function getStatusText(status: string) {
-  const map: Record<string, string> = {
-    pending: '待支付',
-    paid: '已支付',
-    cancelled: '已取消',
-  }
+  const map: Record<string, string> = { pending: '待支付', paid: '已支付', cancelled: '已取消' }
   return map[status] || status
 }
 
 function getStatusSeverity(status: string) {
-  const map: Record<string, string> = {
-    pending: 'warning',
-    paid: 'success',
-    cancelled: 'danger',
-  }
+  const map: Record<string, string> = { pending: 'warn', paid: 'success', cancelled: 'danger' }
   return map[status] || 'secondary'
 }
 </script>

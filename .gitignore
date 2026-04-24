@@ -44,3 +44,6 @@ Thumbs.db
 
 # Temporary
 tmp/
+
+# nul 文件
+nul

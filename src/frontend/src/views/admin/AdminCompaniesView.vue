@@ -1,52 +1,48 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-5">
     <!-- Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <h2 class="text-2xl font-bold text-slate-800 dark:text-white">企业管理</h2>
-        <p class="text-slate-500">管理平台内所有企业账户</p>
-      </div>
+    <div class="page-header">
+      <h2>企业管理</h2>
+      <p>管理平台内所有企业账户</p>
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <Card class="shadow-sm">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <Card class="shadow-none stat-card stat-card-blue">
         <template #content>
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-              <i class="pi pi-building text-blue-600"></i>
+            <div class="w-9 h-9 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+              <i class="pi pi-building text-blue-500 text-sm"></i>
             </div>
             <div>
-              <p class="text-sm text-slate-500">企业总数</p>
-              <p class="text-xl font-bold text-slate-800 dark:text-white">{{ companies.length }}</p>
+              <p class="text-[10px] text-slate-400 font-medium">企业总数</p>
+              <p class="text-lg font-bold text-slate-800 dark:text-white">{{ companies.length }}</p>
             </div>
           </div>
         </template>
       </Card>
-
-      <Card class="shadow-sm">
+      <Card class="shadow-none stat-card stat-card-green">
         <template #content>
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <i class="pi pi-check text-green-600"></i>
+            <div class="w-9 h-9 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center">
+              <i class="pi pi-check text-emerald-500 text-sm"></i>
             </div>
             <div>
-              <p class="text-sm text-slate-500">正常企业</p>
-              <p class="text-xl font-bold text-green-600">{{ activeCompanies }}</p>
+              <p class="text-[10px] text-slate-400 font-medium">正常企业</p>
+              <p class="text-lg font-bold text-emerald-600">{{ activeCompanies }}</p>
             </div>
           </div>
         </template>
       </Card>
-
-      <Card class="shadow-sm">
+      <Card class="shadow-none stat-card stat-card-orange">
         <template #content>
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
-              <i class="pi pi-wallet text-yellow-600"></i>
+            <div class="w-9 h-9 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center">
+              <i class="pi pi-wallet text-amber-500 text-sm"></i>
             </div>
             <div>
-              <p class="text-sm text-slate-500">总余额</p>
-              <p class="text-xl font-bold text-slate-800 dark:text-white">¥{{ totalBalance.toFixed(2) }}</p>
+              <p class="text-[10px] text-slate-400 font-medium">总余额</p>
+              <p class="text-lg font-bold text-slate-800 dark:text-white">¥{{ totalBalance.toFixed(2) }}</p>
             </div>
           </div>
         </template>
@@ -54,64 +50,48 @@
     </div>
 
     <!-- Companies Table -->
-    <Card class="shadow-sm">
+    <Card class="shadow-none">
       <template #title>
-        <div class="flex items-center gap-2">
-          <i class="pi pi-building text-primary-500"></i>
-          <span class="font-bold">企业列表</span>
+        <div class="section-title">
+          <i class="pi pi-building"></i>
+          <span>企业列表</span>
         </div>
       </template>
-
       <template #content>
-        <DataTable 
-          :value="companies" 
-          stripedRows
-          class="p-datatable-sm"
-          :rows="10"
-          paginator
-        >
-          <Column field="id" header="ID">
+        <DataTable :value="companies" stripedRows class="p-datatable-sm" :rows="10" paginator>
+          <Column field="id" header="ID" style="width: 60px">
             <template #body="{ data }">
-              <code class="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">{{ data.id }}</code>
+              <code class="text-[10px] bg-slate-50 dark:bg-slate-700/50 px-1.5 py-0.5 rounded">{{ data.id }}</code>
             </template>
           </Column>
-
           <Column field="name" header="企业名称">
             <template #body="{ data }">
               <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                  <i class="pi pi-building text-primary-600 text-sm"></i>
+                <div class="w-7 h-7 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg flex items-center justify-center">
+                  <i class="pi pi-building text-indigo-500 text-[10px]"></i>
                 </div>
-                <span class="font-medium">{{ data.name }}</span>
+                <span class="font-medium text-sm text-slate-700 dark:text-slate-200">{{ data.name }}</span>
               </div>
             </template>
           </Column>
-
           <Column field="license_no" header="营业执照号">
             <template #body="{ data }">
-              <span class="text-sm text-slate-500">{{ data.license_no || '-' }}</span>
+              <span class="text-xs text-slate-500">{{ data.license_no || '-' }}</span>
             </template>
           </Column>
-
           <Column field="balance" header="余额">
             <template #body="{ data }">
-              <span class="font-semibold text-slate-800 dark:text-white">¥{{ data.balance.toFixed(2) }}</span>
+              <span class="font-semibold text-sm text-slate-700 dark:text-slate-200">¥{{ data.balance.toFixed(2) }}</span>
             </template>
           </Column>
-
           <Column field="status" header="状态">
             <template #body="{ data }">
-              <Tag 
-                :value="data.status === 'active' ? '正常' : '暂停'"
-                :severity="data.status === 'active' ? 'success' : 'warning'"
-                class="text-xs"
-              />
+              <Tag :value="data.status === 'active' ? '正常' : '暂停'" :severity="data.status === 'active' ? 'success' : 'warn'" class="text-[10px]" />
             </template>
           </Column>
-
           <Column header="创建时间">
             <template #body="{ data }">
-              <span class="text-sm text-slate-500">{{ formatDate(data.created_at) }}</span>
+              <span class="text-xs text-slate-400">{{ formatDate(data.created_at) }}</span>
             </template>
           </Column>
         </DataTable>

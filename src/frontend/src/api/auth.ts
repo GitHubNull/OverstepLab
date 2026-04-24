@@ -16,8 +16,11 @@ export const logout = () =>
 export const getProfile = () =>
   apiClient.get<ApiResponse<User>>('/user/profile')
 
-export const updateProfile = (data: { email?: string; phone?: string }) =>
+export const updateProfile = (data: { email?: string; phone?: string; password?: string }) =>
   apiClient.put<ApiResponse>('/user/profile', data)
+
+export const changePassword = (data: { old_password: string; new_password: string }) =>
+  apiClient.put<ApiResponse>('/user/password', data)
 
 export const getUserById = (id: number) =>
   apiClient.get<ApiResponse<User>>(`/users/${id}`)
