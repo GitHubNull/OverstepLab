@@ -1,0 +1,157 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Dark mode scrollbar */
+.dark-mode ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* VPS Status Colors */
+.vps-status-running {
+  color: #22c55e;
+}
+
+.vps-status-stopped {
+  color: #ef4444;
+}
+
+.vps-status-creating {
+  color: #f59e0b;
+}
+
+/* Challenge Badges */
+.challenge-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.challenge-idor { background: #dbeafe; color: #1e40af; }
+.challenge-vertical { background: #fef3c7; color: #92400e; }
+.challenge-context { background: #fce7f3; color: #9d174d; }
+
+/* Card hover effects */
+.p-card {
+  transition: all 0.3s ease;
+}
+
+/* Button transitions */
+.p-button {
+  transition: all 0.2s ease;
+}
+
+/* Input focus effects */
+.p-inputtext:focus,
+.p-password-input:focus {
+  box-shadow: 0 0 0 3px rgba(var(--primary-500), 0.1);
+}
+
+/* Table improvements */
+.p-datatable .p-datatable-tbody > tr {
+  transition: background-color 0.2s ease;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background-color: rgba(var(--primary-500), 0.02);
+}
+
+/* Tag improvements */
+.p-tag {
+  font-weight: 500;
+}
+
+/* Dialog improvements */
+.p-dialog {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.p-dialog-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--surface-200);
+}
+
+.p-dialog-content {
+  padding: 1.5rem;
+}
+
+/* Sidebar improvements */
+.p-sidebar {
+  border-right: 1px solid var(--surface-200);
+}
+
+/* Toast improvements */
+.p-toast {
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.p-toast-message {
+  border-radius: 0.75rem;
+}
+
+/* ProgressSpinner */
+.p-progressspinner {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Avatar improvements */
+.p-avatar {
+  font-weight: 600;
+}
+
+/* Code blocks */
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.dark .glass {
+  background: rgba(15, 23, 42, 0.8);
+}

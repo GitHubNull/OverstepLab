@@ -1,0 +1,46 @@
+# Binaries
+bin/
+*.exe
+src/backend/*.exe
+src/backend/*.exe~
+
+# Build artifacts
+src/backend/internal/web/dist/
+src/frontend/dist/
+
+# Database
+*.db
+oversteplab.db-wal
+oversteplab.db-shm
+src/backend/db/oversteplab.db
+src/backend/db/oversteplab.db-wal
+src/backend/db/oversteplab.db-shm
+src/backend/oversteplab.db-shm
+src/backend/oversteplab.db-wal
+src/test.db-shm
+src/test.db-wal
+src/test.db
+*.db-journal
+data/
+
+# Dependencies
+src/frontend/node_modules/
+src/backend/vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+*.log
+
+# Temporary
+tmp/
