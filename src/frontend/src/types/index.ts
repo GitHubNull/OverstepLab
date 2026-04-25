@@ -134,3 +134,19 @@ export interface ChallengeDetail extends Challenge {
   endpoint: string
   method: string
 }
+
+export interface Announcement {
+  id: number
+  title: string
+  content: string
+  user_id: number
+  is_pinned: boolean
+  created_at: string
+  updated_at: string
+  user?: User
+}
+
+export interface SystemConfig {
+  key: string
+  value: string
+}

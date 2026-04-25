@@ -21,7 +21,11 @@ func (h *CompanyHandler) ListMembers(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
 	members, err := h.companyService.ListMembers(user)
 	if err != nil {
-		common.InternalError(c, err.Error())
+		if err == service.ErrUnauthorized {
+			common.Forbidden(c, err.Error())
+		} else {
+			common.InternalError(c, err.Error())
+		}
 		return
 	}
 	common.Success(c, members)

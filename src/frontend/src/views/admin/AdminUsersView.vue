@@ -48,22 +48,50 @@
               <Tag :value="data.status === 'active' ? '正常' : '禁用'" :severity="data.status === 'active' ? 'success' : 'danger'" class="text-[10px]" />
             </template>
           </Column>
-          <Column header="操作" style="width: 80px">
+          <Column header="操作" style="width: 120px">
             <template #body="{ data }">
-              <Button
-                :icon="data.status === 'active' ? 'pi pi-ban' : 'pi pi-check'"
-                :severity="data.status === 'active' ? 'danger' : 'success'"
-                text
-                rounded
-                size="small"
-                v-tooltip.top="data.status === 'active' ? '禁用' : '启用'"
-                @click="handleToggleStatus(data)"
-              />
+              <div class="flex items-center gap-1">
+                <Button
+                  icon="pi pi-key"
+                  text
+                  rounded
+                  size="small"
+                  v-tooltip.top="'重置密码'"
+                  class="text-[var(--text-tertiary)]"
+                  @click="openResetPassword(data)"
+                />
+                <Button
+                  :icon="data.status === 'active' ? 'pi pi-ban' : 'pi pi-check'"
+                  :severity="data.status === 'active' ? 'danger' : 'success'"
+                  text
+                  rounded
+                  size="small"
+                  v-tooltip.top="data.status === 'active' ? '禁用' : '启用'"
+                  @click="handleToggleStatus(data)"
+                />
+              </div>
             </template>
           </Column>
         </DataTable>
       </template>
     </Card>
+
+    <!-- Reset Password Dialog -->
+    <Dialog v-model:visible="showResetDialog" header="重置密码" modal :style="{ width: '400px' }">
+      <div class="space-y-3">
+        <p class="text-sm text-[var(--text-secondary)]">
+          为用户 <strong class="text-[var(--text-primary)]">{{ resetTarget?.username }}</strong> 设置新密码：
+        </p>
+        <div>
+          <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">新密码</label>
+          <InputText v-model="resetPassword" type="password" class="w-full" placeholder="至少 6 位字符" />
+        </div>
+      </div>
+      <template #footer>
+        <Button label="取消" text size="small" @click="showResetDialog = false" />
+        <Button label="确认重置" icon="pi pi-check" severity="warn" size="small" :loading="resetting" @click="handleResetPassword" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -79,12 +107,19 @@ import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
+import Dialog from 'primevue/dialog'
+import InputText from 'primevue/inputtext'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 
 const toast = useToast()
 const confirm = useConfirm()
 const users = ref<User[]>([])
+
+const showResetDialog = ref(false)
+const resetTarget = ref<User | null>(null)
+const resetPassword = ref('')
+const resetting = ref(false)
 
 onMounted(() => fetchUsers())
 
@@ -109,6 +144,29 @@ function getUserTypeSeverity(type: string) {
 function getRoleText(role: string) {
   const map: Record<string, string> = { admin: '管理员', operator: '运维', finance: '财务', viewer: '只读' }
   return map[role] || role
+}
+
+function openResetPassword(user: User) {
+  resetTarget.value = user
+  resetPassword.value = ''
+  showResetDialog.value = true
+}
+
+async function handleResetPassword() {
+  if (!resetTarget.value || resetPassword.value.length < 6) {
+    toast.add({ severity: 'warn', summary: '提示', detail: '密码至少需要 6 位字符', life: 2000 })
+    return
+  }
+  resetting.value = true
+  try {
+    await api.adminResetUserPassword(resetTarget.value.id, resetPassword.value)
+    toast.add({ severity: 'success', summary: '成功', detail: '密码已重置', life: 2000 })
+    showResetDialog.value = false
+  } catch (e: any) {
+    toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '操作失败', life: 3000 })
+  } finally {
+    resetting.value = false
+  }
 }
 
 function handleToggleStatus(user: User) {

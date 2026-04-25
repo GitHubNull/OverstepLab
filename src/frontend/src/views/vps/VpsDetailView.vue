@@ -18,9 +18,9 @@
       </div>
 
       <div class="flex gap-2 flex-wrap">
-        <Button v-if="vpsStore.currentVps.status === 'stopped'" label="启动" icon="pi pi-play" severity="success" size="small" @click="handleStart" />
-        <Button v-if="vpsStore.currentVps.status === 'running'" label="停止" icon="pi pi-stop" severity="warn" size="small" @click="handleStop" />
-        <Button label="重启" icon="pi pi-refresh" size="small" outlined @click="handleRestart" />
+        <Button v-if="vpsStore.currentVps.status === 'stopped'" label="启动" icon="pi pi-play" severity="success" size="small" :loading="starting" @click="handleStart" />
+        <Button v-if="vpsStore.currentVps.status === 'running'" label="停止" icon="pi pi-stop" severity="warn" size="small" :loading="stopping" @click="handleStop" />
+        <Button label="重启" icon="pi pi-refresh" size="small" outlined :loading="restarting" @click="handleRestart" />
         <Button label="重装系统" icon="pi pi-download" severity="info" size="small" outlined @click="showReinstallDialog = true" />
         <Button label="删除" icon="pi pi-trash" severity="danger" size="small" outlined @click="deleteVps" />
       </div>
@@ -105,7 +105,7 @@
             <p class="text-[11px] text-[var(--text-secondary)]">通过浏览器访问 VPS 终端</p>
           </div>
         </div>
-        <Button label="打开控制台" icon="pi pi-external-link" size="small" outlined />
+        <Button label="打开控制台" icon="pi pi-external-link" size="small" outlined @click="handleConsole" />
       </div>
     </div>
 
@@ -150,6 +150,9 @@ const toast = useToast()
 const showReinstallDialog = ref(false)
 const reinstallOs = ref('Ubuntu 22.04')
 const reinstalling = ref(false)
+const starting = ref(false)
+const stopping = ref(false)
+const restarting = ref(false)
 const osOptions = ['Ubuntu 22.04', 'Ubuntu 20.04', 'CentOS 8', 'Debian 11', 'Debian 12']
 
 onMounted(() => {
@@ -157,33 +160,47 @@ onMounted(() => {
 })
 
 async function handleStart() {
+  starting.value = true
   try {
     await vpsStore.start(vpsStore.currentVps!.id)
     toast.add({ severity: 'success', summary: '成功', detail: 'VPS 已启动', life: 2000 })
     vpsStore.fetchDetail(Number(route.params.id))
   } catch (e: any) {
     toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '操作失败', life: 3000 })
+  } finally {
+    starting.value = false
   }
 }
 
 async function handleStop() {
+  stopping.value = true
   try {
     await vpsStore.stop(vpsStore.currentVps!.id)
     toast.add({ severity: 'success', summary: '成功', detail: 'VPS 已停止', life: 2000 })
     vpsStore.fetchDetail(Number(route.params.id))
   } catch (e: any) {
     toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '操作失败', life: 3000 })
+  } finally {
+    stopping.value = false
   }
 }
 
 async function handleRestart() {
+  restarting.value = true
   try {
     await vpsStore.restart(vpsStore.currentVps!.id)
     toast.add({ severity: 'success', summary: '成功', detail: 'VPS 已重启', life: 2000 })
     vpsStore.fetchDetail(Number(route.params.id))
   } catch (e: any) {
     toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '操作失败', life: 3000 })
+  } finally {
+    restarting.value = false
   }
+}
+
+function handleConsole() {
+  const id = route.params.id
+  window.open(`/api/v1/vps/${id}/console`, '_blank')
 }
 
 async function handleReinstall() {

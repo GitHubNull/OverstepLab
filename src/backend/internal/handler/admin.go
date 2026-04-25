@@ -5,8 +5,11 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/oversteplab/oversteplab/database"
+	"github.com/oversteplab/oversteplab/database/seed"
 	"github.com/oversteplab/oversteplab/internal/common"
 	"github.com/oversteplab/oversteplab/internal/middleware"
+	"github.com/oversteplab/oversteplab/internal/repository"
 	"github.com/oversteplab/oversteplab/internal/service"
 	"github.com/oversteplab/oversteplab/internal/vuln"
 )
@@ -283,6 +286,22 @@ func (h *AdminHandler) UpdateUserStatus(c *gin.Context) {
 	common.SuccessMessage(c, "User status updated")
 }
 
+func (h *AdminHandler) ResetUserPassword(c *gin.Context) {
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	var input struct {
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil || len(input.Password) < 6 {
+		common.BadRequest(c, "Invalid password (minimum 6 characters)")
+		return
+	}
+	if err := h.adminService.ResetUserPassword(uint(id), input.Password); err != nil {
+		common.InternalError(c, err.Error())
+		return
+	}
+	common.SuccessMessage(c, "Password reset successful")
+}
+
 func (h *AdminHandler) ListCompanies(c *gin.Context) {
 	companies, err := h.adminService.ListCompanies()
 	if err != nil {
@@ -310,10 +329,12 @@ func (h *AdminHandler) ListAllLogs(c *gin.Context) {
 	common.Success(c, logs)
 }
 
-type ChallengeHandler struct{}
+type ChallengeHandler struct{
+	dbPath string
+}
 
-func NewChallengeHandler() *ChallengeHandler {
-	return &ChallengeHandler{}
+func NewChallengeHandler(dbPath string) *ChallengeHandler {
+	return &ChallengeHandler{dbPath: dbPath}
 }
 
 func (h *ChallengeHandler) List(c *gin.Context) {
@@ -388,5 +409,132 @@ func (h *ChallengeHandler) SetSecurityMode(c *gin.Context) {
 
 func (h *ChallengeHandler) ResetDatabase(c *gin.Context) {
 	vuln.ResetProgress()
+	if err := database.ReseedDatabase(h.dbPath); err != nil {
+		common.InternalError(c, "Failed to reset database: "+err.Error())
+		return
+	}
+	if err := seed.Seed(database.GetDB()); err != nil {
+		common.InternalError(c, "Failed to seed database: "+err.Error())
+		return
+	}
 	common.SuccessMessage(c, "Database reset successful")
+}
+
+// AnnouncementHandler 公告管理
+type AnnouncementHandler struct {
+	announcementService *service.AnnouncementService
+}
+
+func NewAnnouncementHandler(svc *service.AnnouncementService) *AnnouncementHandler {
+	return &AnnouncementHandler{announcementService: svc}
+}
+
+func (h *AnnouncementHandler) ListPublished(c *gin.Context) {
+	list, err := h.announcementService.List()
+	if err != nil {
+		common.InternalError(c, err.Error())
+		return
+	}
+	common.Success(c, list)
+}
+
+func (h *AnnouncementHandler) Create(c *gin.Context) {
+	user := middleware.GetCurrentUser(c)
+	var input struct {
+		Title    string `json:"title"`
+		Content  string `json:"content"`
+		IsPinned bool   `json:"is_pinned"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil || input.Title == "" || input.Content == "" {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+	a, err := h.announcementService.Create(user, input.Title, input.Content, input.IsPinned)
+	if err != nil {
+		common.Forbidden(c, err.Error())
+		return
+	}
+	common.Success(c, a)
+}
+
+func (h *AnnouncementHandler) Update(c *gin.Context) {
+	user := middleware.GetCurrentUser(c)
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	var input struct {
+		Title    string `json:"title"`
+		Content  string `json:"content"`
+		IsPinned bool   `json:"is_pinned"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+	if err := h.announcementService.Update(user, uint(id), input.Title, input.Content, input.IsPinned); err != nil {
+		if err == service.ErrUnauthorized {
+			common.Forbidden(c, err.Error())
+		} else {
+			common.NotFound(c, err.Error())
+		}
+		return
+	}
+	common.SuccessMessage(c, "Announcement updated")
+}
+
+func (h *AnnouncementHandler) Delete(c *gin.Context) {
+	user := middleware.GetCurrentUser(c)
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err := h.announcementService.Delete(user, uint(id)); err != nil {
+		if err == service.ErrUnauthorized {
+			common.Forbidden(c, err.Error())
+		} else {
+			common.NotFound(c, err.Error())
+		}
+		return
+	}
+	common.SuccessMessage(c, "Announcement deleted")
+}
+
+// ConfigHandler 系统配置管理
+type ConfigHandler struct {
+	configRepo *repository.SystemConfigRepository
+}
+
+func NewConfigHandler() *ConfigHandler {
+	return &ConfigHandler{configRepo: repository.GetSystemConfigRepo()}
+}
+
+func (h *ConfigHandler) GetConfig(c *gin.Context) {
+	configs, err := h.configRepo.List()
+	if err != nil {
+		common.InternalError(c, err.Error())
+		return
+	}
+
+	// 返回默认值作为兜底
+	result := map[string]string{
+		"site_name":               "CloudNest",
+		"allow_registration":      "true",
+		"default_vps_expire_days": "30",
+		"max_vps_per_user":        "10",
+	}
+	for _, cfg := range configs {
+		result[cfg.Key] = cfg.Value
+	}
+	common.Success(c, result)
+}
+
+func (h *ConfigHandler) UpdateConfig(c *gin.Context) {
+	var input struct {
+		Key   string `json:"key"`
+		Value string `json:"value"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil || input.Key == "" {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+	if err := h.configRepo.Upsert(input.Key, input.Value); err != nil {
+		common.InternalError(c, err.Error())
+		return
+	}
+	common.SuccessMessage(c, "Config updated")
 }

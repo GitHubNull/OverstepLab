@@ -330,7 +330,7 @@ const menuGroups = computed<MenuGroup[]>(() => {
   const accountItems: MenuItem[] = [
     { label: '个人资料', icon: 'pi pi-user', to: '/profile' },
   ]
-  if (authStore.user?.user_type === 'company' || authStore.isAdmin) {
+  if (authStore.user?.user_type === 'company') {
     accountItems.push({ label: '企业成员', icon: 'pi pi-users', to: '/members' })
   }
   accountItems.push({ label: 'API Key', icon: 'pi pi-key', to: '/apikeys' })
@@ -374,6 +374,7 @@ const menuGroups = computed<MenuGroup[]>(() => {
           children: [
             { label: '用户管理', to: '/admin/users' },
             { label: '企业管理', to: '/admin/companies' },
+            { label: '公告管理', to: '/admin/announcements' },
             { label: '系统设置', to: '/admin/system' },
           ],
         },

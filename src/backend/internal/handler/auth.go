@@ -79,11 +79,11 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 
 type UserHandler struct {
 	authService *service.AuthService
-	userRepo    interface{}
+	userService *service.UserService
 }
 
-func NewUserHandler(svc *service.AuthService) *UserHandler {
-	return &UserHandler{authService: svc}
+func NewUserHandler(authSvc *service.AuthService, userSvc *service.UserService) *UserHandler {
+	return &UserHandler{authService: authSvc, userService: userSvc}
 }
 
 func (h *UserHandler) GetProfile(c *gin.Context) {
@@ -102,18 +102,18 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	if input.Email != "" {
-		user.Email = input.Email
-	}
-	if input.Phone != "" {
-		user.Phone = input.Phone
+	if err := h.userService.UpdateProfile(user.ID, input.Email, input.Phone); err != nil {
+		common.InternalError(c, err.Error())
+		return
 	}
 
-	// Save via user repo
-	common.Success(c, user)
+	// Return updated profile
+	updated, _ := h.userService.GetProfile(user.ID)
+	common.Success(c, updated)
 }
 
 func (h *UserHandler) ChangePassword(c *gin.Context) {
+	user := middleware.GetCurrentUser(c)
 	var input struct {
 		OldPassword string `json:"old_password"`
 		NewPassword string `json:"new_password"`
@@ -122,6 +122,16 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 		common.BadRequest(c, "Invalid request")
 		return
 	}
+
+	if err := h.userService.ChangePassword(user.ID, input.OldPassword, input.NewPassword); err != nil {
+		if err == service.ErrInvalidCredentials {
+			common.BadRequest(c, "Invalid old password")
+		} else {
+			common.InternalError(c, err.Error())
+		}
+		return
+	}
+
 	common.SuccessMessage(c, "Password changed successfully")
 }
 

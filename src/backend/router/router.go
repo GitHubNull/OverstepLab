@@ -17,6 +17,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 
 	// Initialize services
 	authSvc := service.NewAuthService(cfg)
+	userSvc := service.NewUserService()
 	vpsSvc := service.NewVPSService()
 	companySvc := service.NewCompanyService()
 	orderSvc := service.NewOrderService()
@@ -25,10 +26,11 @@ func Setup(cfg *config.Config) *gin.Engine {
 	auditLogSvc := service.NewAuditLogService()
 	billSvc := service.NewBillService()
 	adminSvc := service.NewAdminService()
+	announceSvc := service.NewAnnouncementService()
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authSvc)
-	userHandler := handler.NewUserHandler(authSvc)
+	userHandler := handler.NewUserHandler(authSvc, userSvc)
 	vpsHandler := handler.NewVPSHandler(vpsSvc)
 	companyHandler := handler.NewCompanyHandler(companySvc)
 	orderHandler := handler.NewOrderHandler(orderSvc)
@@ -37,7 +39,9 @@ func Setup(cfg *config.Config) *gin.Engine {
 	auditLogHandler := handler.NewAuditLogHandler(auditLogSvc)
 	billHandler := handler.NewBillHandler(billSvc)
 	adminHandler := handler.NewAdminHandler(adminSvc)
-	challengeHandler := handler.NewChallengeHandler()
+	challengeHandler := handler.NewChallengeHandler(cfg.DBPath)
+	announceHandler := handler.NewAnnouncementHandler(announceSvc)
+	configHandler := handler.NewConfigHandler()
 
 	// Auth routes (public)
 	auth := r.Group("/api/v1/auth")
@@ -130,16 +134,25 @@ func Setup(cfg *config.Config) *gin.Engine {
 		// Audit log routes
 		authGroup.GET("/audit-logs", auditLogHandler.List)
 
+		// Announcement routes (public for authenticated users)
+		authGroup.GET("/announcements", announceHandler.ListPublished)
+
 		// Admin routes
 		admin := authGroup.Group("/admin")
 		admin.Use(middleware.RequireAdmin())
 		{
 			admin.GET("/users", adminHandler.ListUsers)
 			admin.PUT("/users/:id/status", adminHandler.UpdateUserStatus)
+			admin.PUT("/users/:id/password", adminHandler.ResetUserPassword)
 			admin.GET("/companies", adminHandler.ListCompanies)
 			admin.GET("/vps", adminHandler.ListAllVPS)
 			admin.GET("/audit-logs", adminHandler.ListAllLogs)
 			admin.POST("/reset", challengeHandler.ResetDatabase)
+			admin.POST("/announcements", announceHandler.Create)
+			admin.PUT("/announcements/:id", announceHandler.Update)
+			admin.DELETE("/announcements/:id", announceHandler.Delete)
+			admin.GET("/config", configHandler.GetConfig)
+			admin.PUT("/config", configHandler.UpdateConfig)
 		}
 
 		// Challenge routes

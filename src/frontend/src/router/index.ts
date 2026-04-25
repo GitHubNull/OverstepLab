@@ -97,6 +97,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/admin/AdminSystemView.vue'),
         meta: { requiresAdmin: true },
       },
+      {
+        path: 'admin/announcements',
+        name: 'AdminAnnouncements',
+        component: () => import('@/views/admin/AnnouncementsView.vue'),
+        meta: { requiresAdmin: true },
+      },
     ],
   },
 ]
@@ -124,6 +130,14 @@ router.beforeEach((to) => {
   }
   if (to.path === '/login' && token) {
     return '/'
+  }
+})
+
+router.onError((error: any) => {
+  // Handle dynamic import failures (e.g. Vite HMR timeout, network error)
+  if (error.message?.includes('Failed to fetch dynamically imported module')) {
+    console.warn('[Router] Dynamic import failed, reloading page...')
+    window.location.href = router.currentRoute.value.fullPath
   }
 })
 

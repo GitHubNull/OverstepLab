@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/oversteplab/oversteplab/internal/common"
@@ -241,7 +242,7 @@ func (s *VPSService) GetConsole(user *model.User, vpsID uint) (map[string]string
 	return map[string]string{
 		"url":     "ws://localhost:8080/ws/console/" + hex.EncodeToString([]byte(vps.IPAddress)),
 		"token":   "mock-console-token",
-		"vps_id":  string(rune(vps.ID)),
+		"vps_id":  strconv.FormatUint(uint64(vps.ID), 10),
 		"status":  vps.Status,
 	}, nil
 }

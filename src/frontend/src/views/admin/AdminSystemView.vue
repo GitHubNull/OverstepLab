@@ -3,38 +3,53 @@
     <PageHeader title="系统设置" description="管理系统配置和数据" />
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-      <!-- Database Management -->
+      <!-- System Config -->
       <Card>
         <template #title>
           <div class="section-title">
-            <i class="pi pi-database"></i>
-            <span>数据库管理</span>
+            <i class="pi pi-sliders-h"></i>
+            <span>系统配置</span>
           </div>
         </template>
         <template #content>
-          <div class="relative rounded-xl p-4 overflow-hidden" style="background: var(--danger-subtle); border: 1px solid var(--danger-subtle);">
-            <!-- Left danger bar -->
-            <div class="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full" style="background: var(--danger);"></div>
-            <div class="pl-3 space-y-4">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: var(--danger-subtle);">
-                  <i class="pi pi-exclamation-triangle text-sm" style="color: var(--danger);"></i>
-                </div>
-                <div>
-                  <p class="font-semibold text-sm text-[var(--text-primary)]">重置数据库</p>
-                  <p class="text-[10px] text-[var(--text-tertiary)]">清除所有数据并恢复初始状态</p>
-                </div>
+          <div class="space-y-3">
+            <div v-for="cfg in configFields" :key="cfg.key" class="flex items-center justify-between gap-3">
+              <div class="flex-1 min-w-0">
+                <label class="text-xs font-semibold text-[var(--text-secondary)]">{{ cfg.label }}</label>
               </div>
-              <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
-                此操作将删除所有用户数据、VPS 实例、订单记录等，并将数据库恢复到初始种子状态。<strong style="color: var(--danger);">此操作不可撤销！</strong>
-              </p>
-              <Button
-                label="重置数据库"
-                icon="pi pi-refresh"
-                severity="danger"
-                size="small"
-                @click="handleReset"
-              />
+              <div class="flex items-center gap-2">
+                <InputText
+                  v-if="cfg.type === 'text'"
+                  v-model="configForm[cfg.key]"
+                  size="small"
+                  class="w-36 !text-xs"
+                  @change="saveConfig(cfg.key)"
+                />
+                <Select
+                  v-else-if="cfg.type === 'select'"
+                  v-model="configForm[cfg.key]"
+                  :options="cfg.options"
+                  size="small"
+                  class="w-36 !text-xs"
+                  @change="saveConfig(cfg.key)"
+                />
+                <InputNumber
+                  v-else-if="cfg.type === 'number'"
+                  v-model="configForm[cfg.key]"
+                  size="small"
+                  class="w-36 !text-xs"
+                  @input="saveConfig(cfg.key)"
+                />
+                <Button
+                  icon="pi pi-save"
+                  text
+                  rounded
+                  size="small"
+                  :loading="savingKey === cfg.key"
+                  class="text-[var(--text-tertiary)] flex-shrink-0"
+                  @click="saveConfig(cfg.key)"
+                />
+              </div>
             </div>
           </div>
         </template>
@@ -89,6 +104,42 @@
               <ToggleSwitch
                 v-model="isSecureMode"
                 @change="toggleMode"
+              />
+            </div>
+          </div>
+        </template>
+      </Card>
+
+      <!-- Database Management -->
+      <Card>
+        <template #title>
+          <div class="section-title">
+            <i class="pi pi-database"></i>
+            <span>数据库管理</span>
+          </div>
+        </template>
+        <template #content>
+          <div class="relative rounded-xl p-4 overflow-hidden" style="background: var(--danger-subtle); border: 1px solid var(--danger-subtle);">
+            <div class="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full" style="background: var(--danger);"></div>
+            <div class="pl-3 space-y-4">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: var(--danger-subtle);">
+                  <i class="pi pi-exclamation-triangle text-sm" style="color: var(--danger);"></i>
+                </div>
+                <div>
+                  <p class="font-semibold text-sm text-[var(--text-primary)]">重置数据库</p>
+                  <p class="text-[10px] text-[var(--text-tertiary)]">清除所有数据并恢复初始状态</p>
+                </div>
+              </div>
+              <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+                此操作将删除所有用户数据、VPS 实例、订单记录等，并将数据库恢复到初始种子状态。<strong style="color: var(--danger);">此操作不可撤销！</strong>
+              </p>
+              <Button
+                label="重置数据库"
+                icon="pi pi-refresh"
+                severity="danger"
+                size="small"
+                @click="handleReset"
               />
             </div>
           </div>
@@ -171,7 +222,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
@@ -180,11 +231,50 @@ import PageHeader from '@/components/PageHeader.vue'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import ToggleSwitch from 'primevue/toggleswitch'
+import InputText from 'primevue/inputtext'
+import InputNumber from 'primevue/inputnumber'
+import Select from 'primevue/select'
 
 const authStore = useAuthStore()
 const toast = useToast()
 const confirm = useConfirm()
 const isSecureMode = ref(authStore.securityMode === 'secure')
+const savingKey = ref<string | null>(null)
+
+const configForm = ref<Record<string, any>>({
+  site_name: 'CloudNest',
+  allow_registration: 'true',
+  default_vps_expire_days: '30',
+  max_vps_per_user: '10',
+})
+
+const configFields = [
+  { key: 'site_name', label: '站点名称', type: 'text' },
+  { key: 'allow_registration', label: '允许注册', type: 'select', options: ['true', 'false'] },
+  { key: 'default_vps_expire_days', label: 'VPS 默认过期天数', type: 'number' },
+  { key: 'max_vps_per_user', label: '每用户最大 VPS 数', type: 'number' },
+]
+
+onMounted(async () => {
+  try {
+    const res = await api.getSystemConfig()
+    if (res.data.data) {
+      Object.assign(configForm.value, res.data.data)
+    }
+  } catch {}
+})
+
+async function saveConfig(key: string) {
+  savingKey.value = key
+  try {
+    await api.updateSystemConfig({ key, value: String(configForm.value[key]) })
+    toast.add({ severity: 'success', summary: '成功', detail: '配置已保存', life: 2000 })
+  } catch (e: any) {
+    toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '保存失败', life: 3000 })
+  } finally {
+    savingKey.value = null
+  }
+}
 
 async function toggleMode() {
   await authStore.toggleSecurityMode()

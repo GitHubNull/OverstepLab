@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, Order, Bill, Ticket, TicketReply, APIKey, AuditLog, User, Company, Challenge } from '@/types'
+import type { ApiResponse, Order, Bill, Ticket, TicketReply, APIKey, AuditLog, User, Company, Challenge, Announcement } from '@/types'
 
 // Company
 export const getMembers = () =>
@@ -71,6 +71,9 @@ export const adminListUsers = () =>
 export const adminUpdateUserStatus = (id: number, status: string) =>
   apiClient.put<ApiResponse>(`/admin/users/${id}/status`, { status })
 
+export const adminResetUserPassword = (id: number, password: string) =>
+  apiClient.put<ApiResponse>(`/admin/users/${id}/password`, { password })
+
 export const adminListCompanies = () =>
   apiClient.get<ApiResponse<Company[]>>('/admin/companies')
 
@@ -99,3 +102,23 @@ export const getSecurityMode = () =>
 
 export const setSecurityMode = (mode: string) =>
   apiClient.put<ApiResponse>('/security-mode', { mode })
+
+// Announcements
+export const getAnnouncements = () =>
+  apiClient.get<ApiResponse<Announcement[]>>('/announcements')
+
+export const adminCreateAnnouncement = (data: { title: string; content: string; is_pinned: boolean }) =>
+  apiClient.post<ApiResponse<Announcement>>('/admin/announcements', data)
+
+export const adminUpdateAnnouncement = (id: number, data: { title: string; content: string; is_pinned: boolean }) =>
+  apiClient.put<ApiResponse>(`/admin/announcements/${id}`, data)
+
+export const adminDeleteAnnouncement = (id: number) =>
+  apiClient.delete<ApiResponse>(`/admin/announcements/${id}`)
+
+// System Config
+export const getSystemConfig = () =>
+  apiClient.get<ApiResponse<Record<string, string>>>('/admin/config')
+
+export const updateSystemConfig = (data: { key: string; value: string }) =>
+  apiClient.put<ApiResponse>('/admin/config', data)

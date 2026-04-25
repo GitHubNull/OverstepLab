@@ -2,11 +2,20 @@
   <div class="space-y-5">
     <PageHeader title="企业成员" description="管理企业内的用户和权限">
       <template #actions>
-        <Button label="添加成员" icon="pi pi-plus" size="small" @click="showAddDialog = true" />
+        <Button v-if="!forbidden" label="添加成员" icon="pi pi-plus" size="small" @click="showAddDialog = true" />
       </template>
     </PageHeader>
 
-    <div class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl overflow-hidden">
+    <!-- Forbidden State -->
+    <div v-if="forbidden" class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl p-12 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-[var(--bg-surface-hover)] flex items-center justify-center mx-auto mb-4">
+        <i class="pi pi-lock text-2xl text-[var(--text-tertiary)]"></i>
+      </div>
+      <p class="text-[var(--text-primary)] font-semibold mb-1">无法访问企业成员</p>
+      <p class="text-sm text-[var(--text-tertiary)]">您不是企业用户，无权查看此页面</p>
+    </div>
+
+    <div v-else class="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-xl overflow-hidden">
       <div class="p-0">
         <DataTable
           :value="members"
@@ -120,6 +129,7 @@ const toast = useToast()
 const confirm = useConfirm()
 const members = ref<User[]>([])
 const loading = ref(false)
+const forbidden = ref(false)
 
 const showAddDialog = ref(false)
 const adding = ref(false)
@@ -145,7 +155,11 @@ async function fetchMembers() {
     const response = await api.getMembers()
     members.value = response.data.data!
   } catch (e: any) {
-    toast.add({ severity: 'error', summary: '错误', detail: '获取成员列表失败', life: 3000 })
+    if (e.response?.status === 403) {
+      forbidden.value = true
+    } else {
+      toast.add({ severity: 'error', summary: '错误', detail: '获取成员列表失败', life: 3000 })
+    }
   } finally {
     loading.value = false
   }

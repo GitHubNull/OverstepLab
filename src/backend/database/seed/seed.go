@@ -120,6 +120,25 @@ func Seed(db *gorm.DB) error {
 			tx.Create(&l)
 		}
 
+		// Create announcements
+		announcements := []model.Announcement{
+			{Title: "欢迎使用 CloudNest VPS 管理平台", Content: "这是 OverstepLab 越权测试靶场的模拟平台。请在挑战页面查看所有漏洞挑战，祝您学习愉快！", UserID: 1, IsPinned: true},
+		}
+		for _, a := range announcements {
+			tx.Create(&a)
+		}
+
+		// Create system configs (defaults)
+		configs := []model.SystemConfig{
+			{Key: "site_name", Value: "CloudNest"},
+			{Key: "allow_registration", Value: "true"},
+			{Key: "default_vps_expire_days", Value: "30"},
+			{Key: "max_vps_per_user", Value: "10"},
+		}
+		for _, c := range configs {
+			tx.Create(&c)
+		}
+
 		return nil
 	})
 }

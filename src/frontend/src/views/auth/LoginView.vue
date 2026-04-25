@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0a0a0a]">
+  <div class="dark min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0a0a0a]">
     <!-- Animated grid background -->
     <div class="absolute inset-0 grid-bg opacity-60"></div>
     <!-- Subtle radial glow -->
@@ -7,7 +7,7 @@
 
     <div class="relative z-10 w-full max-w-[420px] px-4">
       <!-- Glass card -->
-      <div class="glass rounded-2xl p-8 shadow-2xl shadow-black/40">
+      <div class="rounded-2xl p-8 shadow-2xl shadow-black/40 bg-[rgba(10,10,10,0.88)] backdrop-blur-xl border border-white/[0.08]">
         <!-- Logo -->
         <div class="text-center mb-7">
           <div class="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl shadow-lg shadow-indigo-500/20 mb-4">
@@ -24,7 +24,7 @@
               <i class="pi pi-user text-neutral-500 z-10" />
               <InputText
                 v-model="username"
-                class="w-full pl-10 bg-white/5 border-white/10 text-white placeholder:text-neutral-500 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
+                class="w-full pl-10 bg-white/10 border-white/15 text-white placeholder:text-neutral-400 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
                 placeholder="请输入用户名"
                 required
                 :class="{ 'p-invalid': error }"
@@ -36,7 +36,7 @@
             <Password
               v-model="password"
               class="w-full"
-              input-class="w-full bg-white/5 border-white/10 text-white placeholder:text-neutral-500 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
+              input-class="w-full bg-white/10 border-white/15 text-white placeholder:text-neutral-400 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
               placeholder="请输入密码"
               :feedback="false"
               required
@@ -60,7 +60,7 @@
         </div>
 
         <!-- Test Accounts -->
-        <div class="mt-6 p-3 bg-white/5 rounded-xl border border-white/10">
+        <div class="mt-6 p-3 bg-white/8 rounded-xl border border-white/10">
           <p class="font-semibold text-[10px] text-neutral-400 mb-2 flex items-center gap-1.5 uppercase tracking-wider">
             <i class="pi pi-info-circle text-indigo-400 text-xs"></i>
             测试账户
@@ -69,11 +69,16 @@
             <div
               v-for="account in testAccounts"
               :key="account.user"
-              class="flex items-center justify-between px-2.5 py-1.5 bg-white/5 rounded-lg cursor-pointer hover:bg-indigo-500/10 transition-colors border border-transparent hover:border-indigo-500/20"
+              class="flex items-center justify-between px-2.5 py-1.5 bg-white/8 rounded-lg cursor-pointer hover:bg-indigo-500/15 transition-colors border border-transparent hover:border-indigo-500/20 group relative"
+              title="点击自动填充"
               @click="fillLogin(account.user, account.pass)"
             >
-              <span class="font-medium text-neutral-300 text-xs">{{ account.user }}</span>
-              <Tag :value="account.role" :severity="account.severity" class="text-[10px]" />
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="font-medium text-neutral-200 text-xs">{{ account.user }}</span>
+                <span class="text-neutral-500 text-[10px]">/</span>
+                <span class="text-neutral-400 text-[11px] font-mono">{{ account.pass }}</span>
+              </div>
+              <Tag :value="account.role" :severity="account.severity" class="text-[10px] shrink-0" />
             </div>
           </div>
         </div>

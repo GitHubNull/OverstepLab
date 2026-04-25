@@ -1,12 +1,12 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0a0a0a]">
+  <div class="dark min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0a0a0a]">
     <!-- Animated grid background -->
     <div class="absolute inset-0 grid-bg opacity-60"></div>
     <!-- Subtle radial glow -->
     <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(79,70,229,0.08)_0%,transparent_70%)]"></div>
 
     <div class="relative z-10 w-full max-w-[440px] px-4">
-      <div class="glass rounded-2xl p-8 shadow-2xl shadow-black/40">
+      <div class="rounded-2xl p-8 shadow-2xl shadow-black/40 bg-[rgba(10,10,10,0.88)] backdrop-blur-xl border border-white/[0.08]">
         <!-- Logo -->
         <div class="text-center mb-6">
           <div class="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl shadow-lg shadow-indigo-500/20 mb-4">
@@ -22,7 +22,7 @@
             class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl cursor-pointer transition-all duration-200 border"
             :class="form.user_type === 'individual'
               ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-400'
-              : 'border-white/10 bg-white/5 text-neutral-500 hover:border-white/20 hover:text-neutral-300'"
+              : 'border-white/10 bg-white/10 text-neutral-400 hover:border-white/20 hover:text-neutral-300'"
             @click="form.user_type = 'individual'"
           >
             <i class="pi pi-user text-sm"></i>
@@ -32,7 +32,7 @@
             class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl cursor-pointer transition-all duration-200 border"
             :class="form.user_type === 'company'
               ? 'border-indigo-500/50 bg-indigo-500/10 text-indigo-400'
-              : 'border-white/10 bg-white/5 text-neutral-500 hover:border-white/20 hover:text-neutral-300'"
+              : 'border-white/10 bg-white/10 text-neutral-400 hover:border-white/20 hover:text-neutral-300'"
             @click="form.user_type = 'company'"
           >
             <i class="pi pi-building text-sm"></i>
@@ -46,7 +46,7 @@
               <label class="block text-xs font-semibold text-neutral-400 mb-1.5 uppercase tracking-wider">企业名称</label>
               <InputText
                 v-model="form.company_name"
-                class="w-full bg-white/5 border-white/10 text-white placeholder:text-neutral-500 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
+                class="w-full bg-white/10 border-white/15 text-white placeholder:text-neutral-400 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
                 placeholder="请输入企业名称"
                 required
               />
@@ -56,7 +56,7 @@
               <label class="block text-xs font-semibold text-neutral-400 mb-1.5 uppercase tracking-wider">用户名</label>
               <InputText
                 v-model="form.username"
-                class="w-full bg-white/5 border-white/10 text-white placeholder:text-neutral-500 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
+                class="w-full bg-white/10 border-white/15 text-white placeholder:text-neutral-400 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
                 :placeholder="form.user_type === 'company' ? '请输入管理员用户名' : '请输入用户名'"
                 required
               />
@@ -67,7 +67,7 @@
               <Password
                 v-model="form.password"
                 class="w-full"
-                input-class="w-full bg-white/5 border-white/10 text-white placeholder:text-neutral-500 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
+                input-class="w-full bg-white/10 border-white/15 text-white placeholder:text-neutral-400 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
                 placeholder="请输入密码"
                 :feedback="true"
                 required
@@ -79,7 +79,7 @@
               <InputText
                 v-model="form.email"
                 type="email"
-                class="w-full bg-white/5 border-white/10 text-white placeholder:text-neutral-500 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
+                class="w-full bg-white/10 border-white/15 text-white placeholder:text-neutral-400 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
                 placeholder="请输入邮箱"
                 required
               />

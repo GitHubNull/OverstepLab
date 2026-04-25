@@ -182,3 +182,16 @@ func (s *AdminService) ListAllVPS() ([]model.VPSInstance, error) {
 func (s *AdminService) ListAllLogs() ([]model.AuditLog, error) {
 	return s.auditRepo.List()
 }
+
+func (s *AdminService) ResetUserPassword(userID uint, newPassword string) error {
+	user, err := s.userRepo.FindByID(userID)
+	if err != nil {
+		return err
+	}
+	hashed, err := common.HashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+	user.PasswordHash = hashed
+	return s.userRepo.Update(user)
+}

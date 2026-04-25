@@ -26,6 +26,24 @@
       </div>
     </div>
 
+    <!-- Announcements -->
+    <div v-if="pinnedAnnouncements.length > 0" class="space-y-2">
+      <div
+        v-for="ann in pinnedAnnouncements"
+        :key="ann.id"
+        class="bg-[var(--info-subtle)] border border-[var(--info-border)] rounded-xl p-4 relative overflow-hidden"
+      >
+        <div class="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-[var(--info)]"></div>
+        <div class="pl-3">
+          <div class="flex items-center gap-2 mb-1">
+            <i class="pi pi-megaphone text-[var(--info)] text-sm"></i>
+            <h3 class="font-semibold text-sm text-[var(--text-primary)]">{{ ann.title }}</h3>
+          </div>
+          <p class="text-xs text-[var(--text-secondary)]">{{ ann.content }}</p>
+        </div>
+      </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
       <StatCard color="#3b82f6" icon="pi pi-server" :value="vpsStore.vpsList.length" label="VPS 总数" />
@@ -138,25 +156,39 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useVpsStore } from '@/stores/vps'
 import { useAuthStore } from '@/stores/auth'
+import { getChallenges, getAnnouncements } from '@/api'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
 import StatCard from '@/components/StatCard.vue'
+import type { Challenge, Announcement } from '@/types'
 
 const vpsStore = useVpsStore()
 const authStore = useAuthStore()
 
-onMounted(() => {
+const challenges = ref<Challenge[]>([])
+const announcements = ref<Announcement[]>([])
+
+onMounted(async () => {
   vpsStore.fetchList()
+  try {
+    const res = await getChallenges()
+    challenges.value = res.data.data!
+  } catch {}
+  try {
+    const res = await getAnnouncements()
+    announcements.value = res.data.data!
+  } catch {}
 })
 
 const runningCount = computed(() => vpsStore.vpsList.filter(v => v.status === 'running').length)
 const stoppedCount = computed(() => vpsStore.vpsList.filter(v => v.status === 'stopped').length)
-const completedChallenges = computed(() => 0) // TODO: implement challenge tracking
+const completedChallenges = computed(() => challenges.value.filter(c => c.completed).length)
+const pinnedAnnouncements = computed(() => announcements.value.filter(a => a.is_pinned))
 
 const quickActions = [
   { label: '漏洞挑战', desc: '开始您的越权测试练习', icon: 'pi pi-flag', color: '#f97316', to: '/challenges' },

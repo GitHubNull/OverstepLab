@@ -73,11 +73,13 @@
             <Button
               v-if="vps.status === 'stopped'"
               label="启动" icon="pi pi-play" severity="success" size="small" class="flex-1"
+              :loading="loadingVpsId === vps.id && loadingAction === 'start'"
               @click="handleStart(vps.id)"
             />
             <Button
               v-if="vps.status === 'running'"
               label="停止" icon="pi pi-stop" severity="warn" size="small" class="flex-1"
+              :loading="loadingVpsId === vps.id && loadingAction === 'stop'"
               @click="handleStop(vps.id)"
             />
           </div>
@@ -147,6 +149,8 @@ const vpsStore = useVpsStore()
 const toast = useToast()
 const showCreateDialog = ref(false)
 const creating = ref(false)
+const loadingVpsId = ref<number | null>(null)
+const loadingAction = ref<string>('')
 
 const cpuOptions = [1, 2, 4, 8]
 const memoryOptions = [512, 1024, 2048, 4096, 8192]
@@ -168,20 +172,30 @@ onMounted(() => {
 })
 
 async function handleStart(id: number) {
+  loadingVpsId.value = id
+  loadingAction.value = 'start'
   try {
     await vpsStore.start(id)
     toast.add({ severity: 'success', summary: '成功', detail: 'VPS 已启动', life: 2000 })
   } catch (e: any) {
     toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '操作失败', life: 3000 })
+  } finally {
+    loadingVpsId.value = null
+    loadingAction.value = ''
   }
 }
 
 async function handleStop(id: number) {
+  loadingVpsId.value = id
+  loadingAction.value = 'stop'
   try {
     await vpsStore.stop(id)
     toast.add({ severity: 'success', summary: '成功', detail: 'VPS 已停止', life: 2000 })
   } catch (e: any) {
     toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '操作失败', life: 3000 })
+  } finally {
+    loadingVpsId.value = null
+    loadingAction.value = ''
   }
 }
 

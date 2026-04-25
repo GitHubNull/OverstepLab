@@ -19,14 +19,16 @@ var (
 )
 
 type AuthService struct {
-	userRepo *repository.UserRepository
-	cfg      *config.Config
+	userRepo    *repository.UserRepository
+	companyRepo *repository.CompanyRepository
+	cfg         *config.Config
 }
 
 func NewAuthService(cfg *config.Config) *AuthService {
 	return &AuthService{
-		userRepo: repository.GetUserRepo(),
-		cfg:      cfg,
+		userRepo:    repository.GetUserRepo(),
+		companyRepo: repository.GetCompanyRepo(),
+		cfg:         cfg,
 	}
 }
 
@@ -58,6 +60,22 @@ func (s *AuthService) Register(input *RegisterInput) (*model.User, error) {
 		Phone:        input.Phone,
 		UserType:     input.UserType,
 		Status:       "active",
+	}
+
+	// Create company for company-type registration
+	if input.UserType == "company" {
+		if input.CompanyName == "" {
+			return nil, errors.New("company name is required for company registration")
+		}
+		company := &model.Company{
+			Name:   input.CompanyName,
+			Status: "active",
+		}
+		if err := s.companyRepo.Create(company); err != nil {
+			return nil, err
+		}
+		user.CompanyID = &company.ID
+		user.Role = "admin"
 	}
 
 	if err := s.userRepo.Create(user); err != nil {

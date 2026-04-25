@@ -10,7 +10,20 @@
         </div>
       </div>
       <div class="p-0">
-        <DataTable :value="orders" class="p-datatable-sm" :rows="10" paginator>
+        <DataTable :value="orders" class="p-datatable-sm" :rows="10" paginator :loading="loading">
+          <template #empty>
+            <div class="text-center py-10">
+              <div class="w-14 h-14 rounded-2xl bg-[var(--bg-surface-hover)] flex items-center justify-center mx-auto mb-3">
+                <i class="pi pi-inbox text-2xl text-[var(--text-tertiary)]"></i>
+              </div>
+              <p class="text-[var(--text-secondary)] text-sm font-medium mb-1">暂无订单记录</p>
+              <p class="text-[var(--text-tertiary)] text-xs">购买 VPS 实例后会自动生成订单</p>
+              <router-link to="/vps" class="inline-flex items-center gap-1.5 mt-3 text-xs font-medium text-[var(--primary)] hover:underline">
+                <i class="pi pi-plus text-[10px]"></i>
+                去创建 VPS
+              </router-link>
+            </div>
+          </template>
           <Column field="order_no" header="订单号">
             <template #body="{ data }">
               <code class="text-xs bg-[var(--bg-base)] px-1.5 py-0.5 rounded text-[var(--text-secondary)] mono">{{ data.order_no }}</code>
@@ -53,10 +66,15 @@ import { formatDate } from '@/utils/date'
 import PageHeader from '@/components/PageHeader.vue'
 
 const orders = ref<Order[]>([])
+const loading = ref(false)
 
 onMounted(async () => {
-  const response = await api.getOrders()
-  orders.value = response.data.data!
+  try {
+    const response = await api.getOrders()
+    orders.value = response.data.data!
+  } catch {
+    // Error handled silently - orders will remain empty
+  }
 })
 
 function getTypeText(type: string) {
