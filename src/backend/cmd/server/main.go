@@ -3,6 +3,7 @@ package main
 import (
 	"io/fs"
 	"log"
+	"mime"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -60,7 +61,11 @@ func main() {
 				defer f.Close()
 				info, err := f.Stat()
 				if err == nil && !info.IsDir() {
-					c.DataFromReader(200, info.Size(), "application/octet-stream", f, nil)
+					contentType := mime.TypeByExtension(filePath)
+					if contentType == "" {
+						contentType = "application/octet-stream"
+					}
+					c.DataFromReader(200, info.Size(), contentType, f, nil)
 					return
 				}
 			}

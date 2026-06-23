@@ -18,7 +18,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 	// Initialize services
 	authSvc := service.NewAuthService(cfg)
 	userSvc := service.NewUserService()
-	vpsSvc := service.NewVPSService()
+	vpsSvc := service.NewVPSService(cfg.JWTSecret)
 	companySvc := service.NewCompanyService()
 	orderSvc := service.NewOrderService()
 	ticketSvc := service.NewTicketService()
@@ -62,6 +62,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 	// Authenticated routes
 	authGroup := api.Group("")
 	authGroup.Use(middleware.AuthMiddleware(cfg.JWTSecret))
+	authGroup.Use(middleware.AuditMiddleware())
 	{
 		authGroup.POST("/logout", authHandler.Logout)
 
@@ -97,6 +98,9 @@ func Setup(cfg *config.Config) *gin.Engine {
 			vps.DELETE("/:id", vpsHandler.Delete)
 			vps.GET("/:id/console", vpsHandler.Console)
 		}
+
+		// Public console view route (uses signed token, no JWT required)
+		api.GET("/vps/:id/console/view", vpsHandler.ConsoleView)
 
 		// Order routes
 		orders := authGroup.Group("/orders")

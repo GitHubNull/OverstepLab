@@ -71,8 +71,10 @@ import PageHeader from '@/components/PageHeader.vue'
 const logs = ref<AuditLog[]>([])
 
 onMounted(async () => {
-  const response = await api.getAuditLogs()
-  logs.value = response.data.data!
+  try {
+    const response = await api.getAuditLogs()
+    logs.value = response.data.data!
+  } catch {}
 })
 
 const todayLogs = computed(() => {

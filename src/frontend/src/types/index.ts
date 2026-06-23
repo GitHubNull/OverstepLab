@@ -83,6 +83,7 @@ export interface Ticket {
   status: string
   created_at: string
   updated_at: string
+  user?: User
 }
 
 export interface TicketReply {
@@ -126,13 +127,17 @@ export interface Challenge {
   difficulty: number
   description: string
   completed: boolean
+  endpoint?: string
+  method?: string
+  hints?: string[]
+  writeup?: string
 }
 
 export interface ChallengeDetail extends Challenge {
-  hints: string[]
-  writeup: string
   endpoint: string
   method: string
+  hints: string[]
+  writeup: string
 }
 
 export interface Announcement {
@@ -149,4 +154,8 @@ export interface Announcement {
 export interface SystemConfig {
   key: string
   value: string
+}
+
+export interface APIKeyCreateResponse extends APIKey {
+  key_value: string
 }

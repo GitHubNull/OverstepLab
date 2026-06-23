@@ -61,6 +61,8 @@ func (h *CompanyHandler) UpdateMember(c *gin.Context) {
 	if err := h.companyService.UpdateMember(user, uint(id), &input); err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
+		} else if err == service.ErrMemberNotFound {
+			common.NotFound(c, "Member not found")
 		} else {
 			common.InternalError(c, err.Error())
 		}
@@ -75,6 +77,8 @@ func (h *CompanyHandler) DeleteMember(c *gin.Context) {
 	if err := h.companyService.DeleteMember(user, uint(id)); err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
+		} else if err == service.ErrMemberNotFound {
+			common.NotFound(c, "Member not found")
 		} else {
 			common.InternalError(c, err.Error())
 		}
@@ -96,6 +100,8 @@ func (h *CompanyHandler) ChangeRole(c *gin.Context) {
 	if err := h.companyService.ChangeRole(user, uint(id), input.Role); err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
+		} else if err == service.ErrMemberNotFound {
+			common.NotFound(c, "Member not found")
 		} else {
 			common.InternalError(c, err.Error())
 		}

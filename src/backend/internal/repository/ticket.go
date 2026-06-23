@@ -21,13 +21,13 @@ func GetTicketRepo() *TicketRepository {
 
 func (r *TicketRepository) FindByID(id uint) (*model.Ticket, error) {
 	var ticket model.Ticket
-	err := r.db.First(&ticket, id).Error
+	err := r.db.Preload("User").First(&ticket, id).Error
 	return &ticket, err
 }
 
 func (r *TicketRepository) FindByUserID(userID uint) ([]model.Ticket, error) {
 	var tickets []model.Ticket
-	err := r.db.Where("user_id = ?", userID).Order("created_at desc").Find(&tickets).Error
+	err := r.db.Where("user_id = ?", userID).Order("created_at desc").Preload("User").Find(&tickets).Error
 	return tickets, err
 }
 
@@ -41,7 +41,7 @@ func (r *TicketRepository) Update(ticket *model.Ticket) error {
 
 func (r *TicketRepository) List() ([]model.Ticket, error) {
 	var tickets []model.Ticket
-	err := r.db.Order("created_at desc").Find(&tickets).Error
+	err := r.db.Order("created_at desc").Preload("User").Find(&tickets).Error
 	return tickets, err
 }
 
@@ -60,7 +60,7 @@ func GetTicketReplyRepo() *TicketReplyRepository {
 
 func (r *TicketReplyRepository) FindByTicketID(ticketID uint) ([]model.TicketReply, error) {
 	var replies []model.TicketReply
-	err := r.db.Where("ticket_id = ?", ticketID).Order("created_at asc").Find(&replies).Error
+	err := r.db.Where("ticket_id = ?", ticketID).Order("created_at asc").Preload("User").Find(&replies).Error
 	return replies, err
 }
 

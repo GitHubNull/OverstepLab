@@ -1,11 +1,15 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/oversteplab/oversteplab/internal/common"
 	"github.com/oversteplab/oversteplab/internal/model"
 	"github.com/oversteplab/oversteplab/internal/repository"
 	"github.com/oversteplab/oversteplab/internal/vuln"
 )
+
+var ErrMemberNotFound = errors.New("member not found")
 
 type CompanyService struct {
 	userRepo    *repository.UserRepository
@@ -73,7 +77,7 @@ type AddMemberInput struct {
 func (s *CompanyService) UpdateMember(user *model.User, memberID uint, input *UpdateMemberInput) error {
 	member, err := s.userRepo.FindByID(memberID)
 	if err != nil {
-		return ErrVPSNotFound
+		return ErrMemberNotFound
 	}
 
 	if vuln.IsSecureMode() {
@@ -107,7 +111,7 @@ type UpdateMemberInput struct {
 func (s *CompanyService) DeleteMember(user *model.User, memberID uint) error {
 	member, err := s.userRepo.FindByID(memberID)
 	if err != nil {
-		return ErrVPSNotFound
+		return ErrMemberNotFound
 	}
 
 	if vuln.IsSecureMode() {
@@ -126,7 +130,7 @@ func (s *CompanyService) DeleteMember(user *model.User, memberID uint) error {
 func (s *CompanyService) ChangeRole(user *model.User, targetID uint, newRole string) error {
 	target, err := s.userRepo.FindByID(targetID)
 	if err != nil {
-		return ErrVPSNotFound
+		return ErrMemberNotFound
 	}
 
 	if vuln.IsSecureMode() {

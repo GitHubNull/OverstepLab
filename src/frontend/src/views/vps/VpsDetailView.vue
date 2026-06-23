@@ -133,6 +133,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useVpsStore } from '@/stores/vps'
+import { getConsole } from '@/api/vps'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import Tag from 'primevue/tag'
@@ -155,8 +156,17 @@ const stopping = ref(false)
 const restarting = ref(false)
 const osOptions = ['Ubuntu 22.04', 'Ubuntu 20.04', 'CentOS 8', 'Debian 11', 'Debian 12']
 
-onMounted(() => {
-  vpsStore.fetchDetail(Number(route.params.id))
+onMounted(async () => {
+  try {
+    await vpsStore.fetchDetail(Number(route.params.id))
+  } catch (e: any) {
+    toast.add({
+      severity: 'error',
+      summary: '加载失败',
+      detail: e.response?.data?.message || '无法获取 VPS 详情',
+      life: 3000,
+    })
+  }
 })
 
 async function handleStart() {
@@ -198,9 +208,18 @@ async function handleRestart() {
   }
 }
 
-function handleConsole() {
-  const id = route.params.id
-  window.open(`/api/v1/vps/${id}/console`, '_blank')
+async function handleConsole() {
+  try {
+    const response = await getConsole(Number(route.params.id))
+    const data = response.data.data
+    if (data?.view_url) {
+      window.open(data.view_url, '_blank')
+    } else {
+      toast.add({ severity: 'error', summary: '错误', detail: '无法获取控制台地址', life: 3000 })
+    }
+  } catch (e: any) {
+    toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '获取控制台失败', life: 3000 })
+  }
 }
 
 async function handleReinstall() {

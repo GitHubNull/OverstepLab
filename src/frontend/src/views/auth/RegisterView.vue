@@ -84,6 +84,16 @@
                 required
               />
             </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-neutral-400 mb-1.5 uppercase tracking-wider">手机号</label>
+              <InputText
+                v-model="form.phone"
+                class="w-full bg-white/10 border-white/15 text-white placeholder:text-neutral-400 focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.15)]"
+                placeholder="请输入手机号"
+                required
+              />
+            </div>
           </div>
 
           <Button
@@ -124,6 +134,7 @@ const form = ref({
   username: '',
   password: '',
   email: '',
+  phone: '',
   company_name: '',
   user_type: 'individual'
 })
@@ -135,6 +146,7 @@ async function handleRegister() {
       username: form.value.username,
       password: form.value.password,
       email: form.value.email,
+      phone: form.value.phone,
       user_type: form.value.user_type,
       ...(form.value.user_type === 'company' && { company_name: form.value.company_name }),
     })

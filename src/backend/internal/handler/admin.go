@@ -368,7 +368,6 @@ func (h *ChallengeHandler) Detail(c *gin.Context) {
 	id := c.Param("id")
 	for _, ch := range vuln.Challenges {
 		if ch.ID == id {
-			// Filter out sensitive fields (hints and writeup) from detail response
 			common.Success(c, map[string]interface{}{
 				"id":          ch.ID,
 				"title":       ch.Title,
@@ -378,6 +377,8 @@ func (h *ChallengeHandler) Detail(c *gin.Context) {
 				"endpoint":    ch.Endpoint,
 				"method":      ch.Method,
 				"completed":   vuln.IsChallengeCompleted(ch.ID),
+				"hints":       ch.Hints,
+				"writeup":     ch.WriteUp,
 			})
 			return
 		}

@@ -4,7 +4,7 @@ import type { ApiResponse, User } from '@/types'
 export const login = (username: string, password: string) =>
   apiClient.post<ApiResponse<{ token: string; refresh_token: string; user: User }>>('/auth/login', { username, password })
 
-export const register = (data: { username: string; password: string; email: string; user_type: string }) =>
+export const register = (data: { username: string; password: string; email: string; user_type: string; company_name?: string }) =>
   apiClient.post<ApiResponse>('/auth/register', data)
 
 export const refreshToken = (refreshToken: string) =>
@@ -16,7 +16,7 @@ export const logout = () =>
 export const getProfile = () =>
   apiClient.get<ApiResponse<User>>('/user/profile')
 
-export const updateProfile = (data: { email?: string; phone?: string; password?: string }) =>
+export const updateProfile = (data: { email?: string; phone?: string }) =>
   apiClient.put<ApiResponse>('/user/profile', data)
 
 export const changePassword = (data: { old_password: string; new_password: string }) =>

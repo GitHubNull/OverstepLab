@@ -26,4 +26,4 @@ export const deleteVps = (id: number) =>
   apiClient.delete<ApiResponse>(`/vps/${id}`)
 
 export const getConsole = (id: number) =>
-  apiClient.get<ApiResponse>(`/vps/${id}/console`)
+  apiClient.get<ApiResponse<{ view_url: string; expires_at: number }>>(`/vps/${id}/console`)

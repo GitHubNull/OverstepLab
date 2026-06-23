@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { ApiResponse, Order, Bill, Ticket, TicketReply, APIKey, AuditLog, User, Company, Challenge, Announcement } from '@/types'
+import type { ApiResponse, Order, Bill, Ticket, TicketReply, APIKey, AuditLog, User, Company, Challenge, ChallengeDetail, Announcement } from '@/types'
 
 // Company
 export const getMembers = () =>
@@ -88,7 +88,7 @@ export const getChallenges = () =>
   apiClient.get<ApiResponse<Challenge[]>>('/challenges')
 
 export const getChallengeDetail = (id: string) =>
-  apiClient.get<ApiResponse>(`/challenges/${id}`)
+  apiClient.get<ApiResponse<ChallengeDetail>>(`/challenges/${id}`)
 
 export const getHint = (id: string, level: number) =>
   apiClient.get<ApiResponse<{ hint: string; level: number }>>(`/challenges/${id}/hints/${level}`)

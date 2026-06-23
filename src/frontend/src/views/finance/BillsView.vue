@@ -106,11 +106,26 @@ const rechargeAmountInput = ref('100')
 const recharging = ref(false)
 
 onMounted(async () => {
-  const response = await api.getBills()
-  bills.value = response.data.data!
+  try {
+    const response = await api.getBills()
+    bills.value = response.data.data!
+  } catch (e: any) {
+    toast.add({
+      severity: 'error',
+      summary: '加载失败',
+      detail: e.response?.data?.message || '无法获取账单列表',
+      life: 3000,
+    })
+  }
 })
 
-const balance = computed(() => bills.value.reduce((sum, b) => sum + b.amount, 0))
+const balance = computed(() => {
+  if (bills.value.length === 0) return 0
+  const sorted = [...bills.value].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  )
+  return sorted[0].balance_after
+})
 const totalExpense = computed(() => Math.abs(bills.value.filter(b => b.type === 'expense').reduce((sum, b) => sum + b.amount, 0)))
 
 async function handleRecharge() {

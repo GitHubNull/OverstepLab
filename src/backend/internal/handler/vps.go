@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +17,17 @@ type VPSHandler struct {
 
 func NewVPSHandler(svc *service.VPSService) *VPSHandler {
 	return &VPSHandler{vpsService: svc}
+}
+
+func handleVPSError(c *gin.Context, err error) {
+	switch err {
+	case service.ErrUnauthorized:
+		common.Forbidden(c, err.Error())
+	case service.ErrVPSNotFound:
+		common.NotFound(c, err.Error())
+	default:
+		common.InternalError(c, err.Error())
+	}
 }
 
 func (h *VPSHandler) List(c *gin.Context) {
@@ -57,11 +70,7 @@ func (h *VPSHandler) Start(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err := h.vpsService.StartVPS(user, uint(id)); err != nil {
-		if err == service.ErrUnauthorized {
-			common.Forbidden(c, err.Error())
-		} else {
-			common.NotFound(c, err.Error())
-		}
+		handleVPSError(c, err)
 		return
 	}
 	common.SuccessMessage(c, "VPS started")
@@ -71,11 +80,7 @@ func (h *VPSHandler) Stop(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err := h.vpsService.StopVPS(user, uint(id)); err != nil {
-		if err == service.ErrUnauthorized {
-			common.Forbidden(c, err.Error())
-		} else {
-			common.NotFound(c, err.Error())
-		}
+		handleVPSError(c, err)
 		return
 	}
 	common.SuccessMessage(c, "VPS stopped")
@@ -85,11 +90,7 @@ func (h *VPSHandler) Restart(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err := h.vpsService.RestartVPS(user, uint(id)); err != nil {
-		if err == service.ErrUnauthorized {
-			common.Forbidden(c, err.Error())
-		} else {
-			common.NotFound(c, err.Error())
-		}
+		handleVPSError(c, err)
 		return
 	}
 	common.SuccessMessage(c, "VPS restarted")
@@ -106,11 +107,7 @@ func (h *VPSHandler) Reinstall(c *gin.Context) {
 		return
 	}
 	if err := h.vpsService.ReinstallVPS(user, uint(id), input.OSImage); err != nil {
-		if err == service.ErrUnauthorized {
-			common.Forbidden(c, err.Error())
-		} else {
-			common.NotFound(c, err.Error())
-		}
+		handleVPSError(c, err)
 		return
 	}
 	common.SuccessMessage(c, "VPS reinstalled")
@@ -120,11 +117,7 @@ func (h *VPSHandler) Delete(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err := h.vpsService.DeleteVPS(user, uint(id)); err != nil {
-		if err == service.ErrUnauthorized {
-			common.Forbidden(c, err.Error())
-		} else {
-			common.NotFound(c, err.Error())
-		}
+		handleVPSError(c, err)
 		return
 	}
 	common.SuccessMessage(c, "VPS deleted")
@@ -135,8 +128,41 @@ func (h *VPSHandler) Console(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	console, err := h.vpsService.GetConsole(user, uint(id))
 	if err != nil {
-		common.NotFound(c, err.Error())
+		handleVPSError(c, err)
 		return
 	}
 	common.Success(c, console)
+}
+
+func (h *VPSHandler) ConsoleView(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		common.Unauthorized(c, "Missing console token")
+		return
+	}
+
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	data, err := h.vpsService.GetConsoleView(token, uint(id))
+	if err != nil {
+		if err == service.ErrUnauthorized {
+			common.Forbidden(c, err.Error())
+		} else {
+			common.NotFound(c, err.Error())
+		}
+		return
+	}
+
+	html := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head><title>Console - VPS %s</title></head>
+<body>
+  <h1>VPS 控制台</h1>
+  <p><strong>状态:</strong> %s</p>
+  <p><strong>IP:</strong> %s</p>
+  <p><strong>WebSocket:</strong> %s</p>
+  <p><strong>Token:</strong> %s</p>
+</body>
+</html>`, data["vps_id"], data["status"], data["ip_address"], data["url"], data["token"])
+
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
 }

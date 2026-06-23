@@ -87,10 +87,10 @@
           </div>
 
           <!-- Endpoint -->
-          <div class="bg-[var(--bg-base)] rounded-lg p-2.5 border border-[var(--border-subtle)]">
+          <div v-if="ch.endpoint && ch.method" class="bg-[var(--bg-base)] rounded-lg p-2.5 border border-[var(--border-subtle)]">
             <div class="flex items-center gap-2">
-              <code class="text-[10px] px-1.5 py-0.5 rounded bg-[var(--primary-subtle)] text-[var(--primary)] mono font-semibold">{{ (ch as any).method }}</code>
-              <code class="text-[11px] text-[var(--text-secondary)] mono truncate">{{ (ch as any).endpoint }}</code>
+              <code class="text-[10px] px-1.5 py-0.5 rounded bg-[var(--primary-subtle)] text-[var(--primary)] mono font-semibold">{{ ch.method }}</code>
+              <code class="text-[11px] text-[var(--text-secondary)] mono truncate">{{ ch.endpoint }}</code>
             </div>
           </div>
 
@@ -116,7 +116,7 @@
     <!-- Hint Dialog -->
     <Dialog v-model:visible="hintDialogVisible" :header="`提示 - ${selectedChallenge?.title}`" modal :style="{ width: '500px' }">
       <div v-if="selectedChallenge" class="space-y-3">
-        <div v-for="(hint, index) in (selectedChallenge as any).hints" :key="index" class="space-y-1">
+        <div v-for="(hint, index) in challengeDetail?.hints" :key="index" class="space-y-1">
           <div class="flex items-center gap-2">
             <Tag :value="`Level ${index + 1}`" severity="warn" class="text-[10px]" />
           </div>
@@ -130,7 +130,7 @@
       <div v-if="selectedChallenge" class="space-y-4">
         <div class="bg-[var(--bg-base)] rounded-xl p-4 border border-[var(--border-default)]">
           <h4 class="font-semibold text-sm text-[var(--text-primary)] mb-2">漏洞分析</h4>
-          <p class="text-sm text-[var(--text-secondary)] leading-relaxed">{{ (selectedChallenge as any).writeup }}</p>
+          <p class="text-sm text-[var(--text-secondary)] leading-relaxed">{{ challengeDetail?.writeup }}</p>
         </div>
         <div class="bg-[var(--bg-base)] rounded-xl p-4 border border-[var(--border-default)]">
           <h4 class="font-semibold text-sm text-[var(--text-primary)] mb-2">影响</h4>
@@ -148,7 +148,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import * as api from '@/api'
-import type { Challenge } from '@/types'
+import type { Challenge, ChallengeDetail } from '@/types'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -161,6 +161,7 @@ const selectedCategory = ref('all')
 const hintDialogVisible = ref(false)
 const writeupDialogVisible = ref(false)
 const selectedChallenge = ref<Challenge | null>(null)
+const challengeDetail = ref<ChallengeDetail | null>(null)
 
 const categories = [
   { label: '全部', value: 'all' },
@@ -170,8 +171,17 @@ const categories = [
 ]
 
 onMounted(async () => {
-  const response = await api.getChallenges()
-  challenges.value = response.data.data!
+  try {
+    const response = await api.getChallenges()
+    challenges.value = response.data.data!
+  } catch (e: any) {
+    toast.add({
+      severity: 'error',
+      summary: '加载失败',
+      detail: e.response?.data?.message || '无法获取挑战列表',
+      life: 3000,
+    })
+  }
 })
 
 const filteredChallenges = computed(() => {
@@ -200,13 +210,29 @@ function getCategoryStyle(cat: string) {
   }
 }
 
-function showHints(ch: Challenge) {
+async function loadChallengeDetail(ch: Challenge) {
   selectedChallenge.value = ch
+  try {
+    const response = await api.getChallengeDetail(ch.id)
+    challengeDetail.value = response.data.data!
+  } catch (e: any) {
+    challengeDetail.value = null
+    toast.add({
+      severity: 'error',
+      summary: '加载失败',
+      detail: e.response?.data?.message || '无法获取挑战详情',
+      life: 3000,
+    })
+  }
+}
+
+async function showHints(ch: Challenge) {
+  await loadChallengeDetail(ch)
   hintDialogVisible.value = true
 }
 
-function showWriteup(ch: Challenge) {
-  selectedChallenge.value = ch
+async function showWriteup(ch: Challenge) {
+  await loadChallengeDetail(ch)
   writeupDialogVisible.value = true
 }
 

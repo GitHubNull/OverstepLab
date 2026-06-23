@@ -24,6 +24,7 @@ type JWTClaims struct {
 	UserType string `json:"user_type"`
 	Role     string `json:"role"`
 	CompanyID *uint `json:"company_id,omitempty"`
+	Type     string `json:"type"`
 	jwt.RegisteredClaims
 }
 
@@ -48,6 +49,7 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 		// Check if using API Key authentication
 		if strings.HasPrefix(tokenString, "sk_") {
 			if handleAPIKeyAuth(c, tokenString, jwtSecret) {
+				c.Next()
 				return
 			}
 			common.Unauthorized(c, "Invalid API key")
@@ -58,6 +60,12 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 		claims, err := parseJWT(tokenString, jwtSecret)
 		if err != nil {
 			common.Unauthorized(c, "Invalid or expired token")
+			c.Abort()
+			return
+		}
+
+		if claims.Type != "" && claims.Type != "access" {
+			common.Unauthorized(c, "Invalid token type")
 			c.Abort()
 			return
 		}
@@ -140,13 +148,14 @@ func parseJWT(tokenString, secret string) (*JWTClaims, error) {
 	return claims, nil
 }
 
-func GenerateJWT(user *model.User, secret string, expiry time.Duration) (string, error) {
+func GenerateJWT(user *model.User, secret string, expiry time.Duration, tokenType string) (string, error) {
 	claims := &JWTClaims{
 		UserID:    user.ID,
 		Username:  user.Username,
 		UserType:  user.UserType,
 		Role:      user.Role,
 		CompanyID: user.CompanyID,
+		Type:      tokenType,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

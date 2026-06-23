@@ -75,8 +75,10 @@ import { formatDate } from '@/utils/date'
 const companies = ref<Company[]>([])
 
 onMounted(async () => {
-  const response = await api.adminListCompanies()
-  companies.value = response.data.data!
+  try {
+    const response = await api.adminListCompanies()
+    companies.value = response.data.data!
+  } catch {}
 })
 
 const activeCompanies = computed(() => companies.value.filter(c => c.status === 'active').length)

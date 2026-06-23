@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/oversteplab/oversteplab/internal/common"
 	"github.com/oversteplab/oversteplab/internal/model"
 	"github.com/oversteplab/oversteplab/internal/repository"
@@ -26,15 +27,17 @@ type VPSService struct {
 	companyRepo *repository.CompanyRepository
 	orderRepo   *repository.OrderRepository
 	billRepo    *repository.BillRepository
+	jwtSecret   string
 }
 
-func NewVPSService() *VPSService {
+func NewVPSService(jwtSecret string) *VPSService {
 	return &VPSService{
 		vpsRepo:     repository.GetVPSRepo(),
 		userRepo:    repository.GetUserRepo(),
 		companyRepo: repository.GetCompanyRepo(),
 		orderRepo:   repository.GetOrderRepo(),
 		billRepo:    repository.GetBillRepo(),
+		jwtSecret:   jwtSecret,
 	}
 }
 
@@ -110,7 +113,7 @@ func (s *VPSService) canControlVPS(user *model.User, vps *model.VPSInstance) boo
 
 func (s *VPSService) Create(user *model.User, input *CreateVPSInput) (*model.VPSInstance, error) {
 	if vuln.IsSecureMode() {
-		if !user.IsPlatformAdmin() && !user.IsCompanyAdmin() && !user.IsIndividual() {
+		if !user.IsPlatformAdmin() && !user.IsCompanyAdmin() && !user.IsIndividual() && user.Role != "operator" {
 			return nil, ErrUnauthorized
 		}
 	}
@@ -207,7 +210,7 @@ func (s *VPSService) ReinstallVPS(user *model.User, vpsID uint, osImage string) 
 	}
 
 	if vuln.IsSecureMode() {
-		if !user.IsPlatformAdmin() && !user.IsCompanyAdmin() && !user.IsIndividual() {
+		if !user.IsPlatformAdmin() && !user.IsCompanyAdmin() && !user.IsIndividual() && user.Role != "operator" {
 			return ErrUnauthorized
 		}
 	}
@@ -226,7 +229,7 @@ func (s *VPSService) DeleteVPS(user *model.User, vpsID uint) error {
 		return ErrVPSNotFound
 	}
 	if vuln.IsSecureMode() {
-		if !user.IsPlatformAdmin() && !user.IsCompanyAdmin() && !user.IsIndividual() {
+		if !user.IsPlatformAdmin() && !user.IsCompanyAdmin() && !user.IsIndividual() && user.Role != "operator" {
 			return ErrUnauthorized
 		}
 	}
@@ -236,7 +239,38 @@ func (s *VPSService) DeleteVPS(user *model.User, vpsID uint) error {
 	return s.vpsRepo.Delete(vpsID)
 }
 
-func (s *VPSService) GetConsole(user *model.User, vpsID uint) (map[string]string, error) {
+type ConsoleClaims struct {
+	UserID uint `json:"user_id"`
+	VPSID  uint `json:"vps_id"`
+	jwt.RegisteredClaims
+}
+
+func (s *VPSService) generateConsoleToken(user *model.User, vps *model.VPSInstance) (string, int64, error) {
+	exp := time.Now().Add(5 * time.Minute)
+	claims := &ConsoleClaims{
+		UserID: user.ID,
+		VPSID:  vps.ID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(exp),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signed, err := token.SignedString([]byte(s.jwtSecret))
+	return signed, exp.Unix(), err
+}
+
+func (s *VPSService) parseConsoleToken(tokenStr string) (*ConsoleClaims, error) {
+	claims := &ConsoleClaims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(s.jwtSecret), nil
+	})
+	if err != nil || !token.Valid {
+		return nil, err
+	}
+	return claims, nil
+}
+
+func (s *VPSService) GetConsole(user *model.User, vpsID uint) (map[string]interface{}, error) {
 	vps, err := s.vpsRepo.FindByID(vpsID)
 	if err != nil {
 		return nil, ErrVPSNotFound
@@ -246,12 +280,46 @@ func (s *VPSService) GetConsole(user *model.User, vpsID uint) (map[string]string
 			return nil, ErrUnauthorized
 		}
 	}
+
+	token, exp, err := s.generateConsoleToken(user, vps)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"view_url":   fmt.Sprintf("/api/v1/vps/%d/console/view?token=%s", vps.ID, token),
+		"expires_at": exp,
+	}, nil
+}
+
+func (s *VPSService) GetConsoleView(tokenStr string, vpsID uint) (map[string]string, error) {
+	claims, err := s.parseConsoleToken(tokenStr)
+	if err != nil {
+		return nil, ErrUnauthorized
+	}
+	if claims.VPSID != vpsID {
+		return nil, ErrUnauthorized
+	}
+
+	user, err := s.userRepo.FindByID(claims.UserID)
+	if err != nil {
+		return nil, ErrUnauthorized
+	}
+	vps, err := s.vpsRepo.FindByID(claims.VPSID)
+	if err != nil {
+		return nil, ErrVPSNotFound
+	}
+
+	if vuln.IsSecureMode() && (!s.canManageVPS(user) || !s.canAccessVPS(user, vps)) {
+		return nil, ErrUnauthorized
+	}
+
 	return map[string]string{
-		"url":         "ws://localhost:8080/ws/console/" + hex.EncodeToString([]byte(vps.IPAddress)),
-		"token":       "mock-console-token",
-		"vps_id":      strconv.FormatUint(uint64(vps.ID), 10),
-		"status":      vps.Status,
-		"ip_address":  vps.IPAddress,
+		"url":        "ws://localhost:8080/ws/console/" + hex.EncodeToString([]byte(vps.IPAddress)),
+		"token":      "mock-console-token",
+		"vps_id":     strconv.FormatUint(uint64(vps.ID), 10),
+		"status":     vps.Status,
+		"ip_address": vps.IPAddress,
 	}, nil
 }
 

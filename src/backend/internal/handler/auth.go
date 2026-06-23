@@ -7,6 +7,7 @@ import (
 	"github.com/oversteplab/oversteplab/internal/common"
 	"github.com/oversteplab/oversteplab/internal/middleware"
 	"github.com/oversteplab/oversteplab/internal/service"
+	"github.com/oversteplab/oversteplab/internal/vuln"
 )
 
 type AuthHandler struct {
@@ -150,9 +151,11 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 		return
 	}
 
-	// If secure mode and not platform admin, can only view self
-	if currentUser.ID != target.ID && !currentUser.IsPlatformAdmin() {
-		// In vulnerable mode, allow through anyway
+	if vuln.IsSecureMode() {
+		if currentUser.ID != target.ID && !currentUser.IsPlatformAdmin() {
+			common.Forbidden(c, "Access denied")
+			return
+		}
 	}
 
 	common.Success(c, target)

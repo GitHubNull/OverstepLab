@@ -117,9 +117,18 @@ const replyContent = ref('')
 const submitting = ref(false)
 
 onMounted(async () => {
-  const response = await api.getTicketDetail(Number(route.params.id))
-  ticket.value = response.data.data!.ticket
-  replies.value = response.data.data!.replies
+  try {
+    const response = await api.getTicketDetail(Number(route.params.id))
+    ticket.value = response.data.data!.ticket
+    replies.value = response.data.data!.replies
+  } catch (e: any) {
+    toast.add({
+      severity: 'error',
+      summary: '加载失败',
+      detail: e.response?.data?.message || '无法获取工单详情',
+      life: 3000,
+    })
+  }
 })
 
 function getStatusText(status: string) {

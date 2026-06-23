@@ -38,7 +38,7 @@
                   v-model="configForm[cfg.key]"
                   size="small"
                   class="w-36 !text-xs"
-                  @input="saveConfig(cfg.key)"
+                  @change="saveConfig(cfg.key)"
                 />
                 <Button
                   icon="pi pi-save"

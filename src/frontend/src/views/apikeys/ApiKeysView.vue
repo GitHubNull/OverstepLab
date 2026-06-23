@@ -99,7 +99,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import * as api from '@/api'
-import type { APIKey } from '@/types'
+import type { APIKey, APIKeyCreateResponse } from '@/types'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
@@ -120,11 +120,22 @@ const newKeyValue = ref('')
 const createForm = ref({ name: '', permissions: 'read' })
 const permissionOptions = ['read', 'write', 'read-write']
 
-onMounted(() => fetchKeys())
+onMounted(async () => {
+  await fetchKeys()
+})
 
 async function fetchKeys() {
-  const response = await api.getApiKeys()
-  keys.value = response.data.data!
+  try {
+    const response = await api.getApiKeys()
+    keys.value = response.data.data!
+  } catch (e: any) {
+    toast.add({
+      severity: 'error',
+      summary: '加载失败',
+      detail: e.response?.data?.message || '无法获取 API Key 列表',
+      life: 3000,
+    })
+  }
 }
 
 async function handleCreate() {
@@ -135,7 +146,7 @@ async function handleCreate() {
   creating.value = true
   try {
     const response = await api.createApiKey(createForm.value)
-    newKeyValue.value = (response.data.data as any)?.key || 'sk_****'
+    newKeyValue.value = (response.data.data as APIKeyCreateResponse)?.key_value || 'sk_****'
     showCreateDialog.value = false
     showNewKeyDialog.value = true
     createForm.value = { name: '', permissions: 'read' }

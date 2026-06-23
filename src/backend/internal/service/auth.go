@@ -117,12 +117,12 @@ func (s *AuthService) Login(input *LoginInput) (*LoginOutput, error) {
 		return nil, ErrInvalidCredentials
 	}
 
-	token, err := middleware.GenerateJWT(user, s.cfg.JWTSecret, 24*time.Hour)
+	token, err := middleware.GenerateJWT(user, s.cfg.JWTSecret, 24*time.Hour, "access")
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := middleware.GenerateJWT(user, s.cfg.JWTSecret, 7*24*time.Hour)
+	refreshToken, err := middleware.GenerateJWT(user, s.cfg.JWTSecret, 7*24*time.Hour, "refresh")
 	if err != nil {
 		return nil, err
 	}
@@ -140,6 +140,10 @@ func (s *AuthService) Refresh(token string) (*LoginOutput, error) {
 		return nil, errors.New("invalid refresh token")
 	}
 
+	if claims.Type != "refresh" {
+		return nil, errors.New("invalid refresh token")
+	}
+
 	user, err := s.userRepo.FindByID(claims.UserID)
 	if err != nil {
 		return nil, errors.New("user not found")
@@ -149,12 +153,12 @@ func (s *AuthService) Refresh(token string) (*LoginOutput, error) {
 		return nil, ErrAccountDisabled
 	}
 
-	newToken, err := middleware.GenerateJWT(user, s.cfg.JWTSecret, 24*time.Hour)
+	newToken, err := middleware.GenerateJWT(user, s.cfg.JWTSecret, 24*time.Hour, "access")
 	if err != nil {
 		return nil, err
 	}
 
-	newRefreshToken, err := middleware.GenerateJWT(user, s.cfg.JWTSecret, 7*24*time.Hour)
+	newRefreshToken, err := middleware.GenerateJWT(user, s.cfg.JWTSecret, 7*24*time.Hour, "refresh")
 	if err != nil {
 		return nil, err
 	}

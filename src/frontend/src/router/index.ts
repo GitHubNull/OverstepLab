@@ -120,9 +120,13 @@ router.beforeEach((to) => {
   if (to.meta.requiresAdmin) {
     const user = localStorage.getItem('user')
     if (user) {
-      const parsed = JSON.parse(user)
-      if (parsed.user_type !== 'platform_admin') {
-        return '/'
+      try {
+        const parsed = JSON.parse(user)
+        if (parsed.user_type !== 'platform_admin') {
+          return '/'
+        }
+      } catch {
+        return '/login'
       }
     } else {
       return '/login'

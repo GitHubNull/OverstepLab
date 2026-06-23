@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { login as apiLogin, register as apiRegister, getProfile, logout as apiLogout } from '@/api/auth'
+import { getSecurityMode } from '@/api'
 import type { User } from '@/types'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string>(localStorage.getItem('token') || '')
+  const refreshTokenValue = ref<string>(localStorage.getItem('refresh_token') || '')
   const storedUser = localStorage.getItem('user')
   const user = ref<User | null>(storedUser ? JSON.parse(storedUser) : null)
   const securityMode = ref<string>('vulnerable')
@@ -21,12 +23,14 @@ export const useAuthStore = defineStore('auth', () => {
     const response = await apiLogin(username, password)
     const loginData = response.data.data!
     token.value = loginData.token
+    refreshTokenValue.value = loginData.refresh_token
     user.value = loginData.user
     localStorage.setItem('token', loginData.token)
+    localStorage.setItem('refresh_token', loginData.refresh_token)
     localStorage.setItem('user', JSON.stringify(loginData.user))
   }
 
-  async function register(formData: { username: string; password: string; email: string; user_type: string }) {
+  async function register(formData: { username: string; password: string; email: string; phone?: string; user_type: string; company_name?: string }) {
     await apiRegister(formData)
   }
 
@@ -41,34 +45,52 @@ export const useAuthStore = defineStore('auth', () => {
       await apiLogout()
     } catch {}
     token.value = ''
+    refreshTokenValue.value = ''
     user.value = null
     localStorage.removeItem('token')
+    localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
   }
 
   async function toggleSecurityMode() {
     const newMode = securityMode.value === 'vulnerable' ? 'secure' : 'vulnerable'
-    const { getSecurityMode: getMode, setSecurityMode: setMode } = await import('@/api')
+    const { setSecurityMode: setMode } = await import('@/api')
     await setMode(newMode)
-    securityMode.value = newMode
+    await syncSecurityMode()
   }
 
-  function init() {
+  async function syncSecurityMode() {
+    try {
+      const res = await getSecurityMode()
+      securityMode.value = res.data.data!.mode
+    } catch {
+      securityMode.value = 'vulnerable'
+    }
+  }
+
+  async function init() {
     const storedUser = localStorage.getItem('user')
     const storedToken = localStorage.getItem('token')
+    const storedRefreshToken = localStorage.getItem('refresh_token')
     if (storedUser && storedToken) {
       try {
         user.value = JSON.parse(storedUser)
         token.value = storedToken
+        refreshTokenValue.value = storedRefreshToken || ''
       } catch {
-        logout()
+        await logout()
+        return
       }
+    }
+    // 未登录时不请求需要认证的安全模式接口，避免在登录/注册页触发 401 重定向循环
+    if (storedToken) {
+      await syncSecurityMode()
     }
   }
 
   return {
-    token, user, securityMode, isAuthenticated, isAdmin, isCompanyAdmin,
+    token, refreshTokenValue, user, securityMode, isAuthenticated, isAdmin, isCompanyAdmin,
     isViewer, isOperator, isFinance, isIndividual,
-    login, register, fetchProfile, logout, toggleSecurityMode, init,
+    login, register, fetchProfile, logout, toggleSecurityMode, syncSecurityMode, init,
   }
 })
