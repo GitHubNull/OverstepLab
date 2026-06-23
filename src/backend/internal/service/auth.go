@@ -62,6 +62,11 @@ func (s *AuthService) Register(input *RegisterInput) (*model.User, error) {
 		Status:       "active",
 	}
 
+	// Set default role based on user type
+	if input.UserType == "individual" {
+		user.Role = "individual"
+	}
+
 	// Create company for company-type registration
 	if input.UserType == "company" {
 		if input.CompanyName == "" {
@@ -74,7 +79,9 @@ func (s *AuthService) Register(input *RegisterInput) (*model.User, error) {
 		if err := s.companyRepo.Create(company); err != nil {
 			return nil, err
 		}
-		user.CompanyID = &company.ID
+		// Capture company ID by value to ensure it's persisted correctly
+		companyID := company.ID
+		user.CompanyID = &companyID
 		user.Role = "admin"
 	}
 

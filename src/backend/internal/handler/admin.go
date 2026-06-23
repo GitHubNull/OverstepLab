@@ -218,7 +218,19 @@ func (h *APIKeyHandler) Create(c *gin.Context) {
 		common.InternalError(c, err.Error())
 		return
 	}
-	common.Success(c, key)
+	// Return raw key in response (only time it's ever shown)
+	common.Success(c, gin.H{
+		"id":          key.ID,
+		"user_id":     key.UserID,
+		"name":        key.Name,
+		"key_value":   key.KeyValue, // raw key, only shown on creation
+		"key_prefix":  key.KeyPrefix,
+		"permissions": key.Permissions,
+		"status":      key.Status,
+		"last_used_at": key.LastUsedAt,
+		"expire_at":   key.ExpireAt,
+		"created_at":  key.CreatedAt,
+	})
 }
 
 func (h *APIKeyHandler) Delete(c *gin.Context) {
@@ -356,7 +368,17 @@ func (h *ChallengeHandler) Detail(c *gin.Context) {
 	id := c.Param("id")
 	for _, ch := range vuln.Challenges {
 		if ch.ID == id {
-			common.Success(c, ch)
+			// Filter out sensitive fields (hints and writeup) from detail response
+			common.Success(c, map[string]interface{}{
+				"id":          ch.ID,
+				"title":       ch.Title,
+				"category":    ch.Category,
+				"difficulty":  ch.Difficulty,
+				"description": ch.Description,
+				"endpoint":    ch.Endpoint,
+				"method":      ch.Method,
+				"completed":   vuln.IsChallengeCompleted(ch.ID),
+			})
 			return
 		}
 	}

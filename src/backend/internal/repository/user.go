@@ -31,6 +31,12 @@ func (r *UserRepository) FindByUsername(username string) (*model.User, error) {
 	return &user, err
 }
 
+func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
+	var user model.User
+	err := r.db.Where("email = ?", email).First(&user).Error
+	return &user, err
+}
+
 func (r *UserRepository) FindByCompanyID(companyID uint) ([]model.User, error) {
 	var users []model.User
 	err := r.db.Where("company_id = ?", companyID).Find(&users).Error

@@ -1,9 +1,11 @@
 package service
 
 import (
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -127,6 +129,11 @@ func (s *VPSService) Create(user *model.User, input *CreateVPSInput) (*model.VPS
 		ExpireAt:  time.Now().AddDate(0, 1, 0),
 	}
 
+	// Auto-assign IP address if not provided
+	if vps.IPAddress == "" {
+		vps.IPAddress = generateRandomIP()
+	}
+
 	if err := s.vpsRepo.Create(vps); err != nil {
 		return nil, err
 	}
@@ -240,10 +247,11 @@ func (s *VPSService) GetConsole(user *model.User, vpsID uint) (map[string]string
 		}
 	}
 	return map[string]string{
-		"url":     "ws://localhost:8080/ws/console/" + hex.EncodeToString([]byte(vps.IPAddress)),
-		"token":   "mock-console-token",
-		"vps_id":  strconv.FormatUint(uint64(vps.ID), 10),
-		"status":  vps.Status,
+		"url":         "ws://localhost:8080/ws/console/" + hex.EncodeToString([]byte(vps.IPAddress)),
+		"token":       "mock-console-token",
+		"vps_id":      strconv.FormatUint(uint64(vps.ID), 10),
+		"status":      vps.Status,
+		"ip_address":  vps.IPAddress,
 	}, nil
 }
 
@@ -251,4 +259,11 @@ func (s *VPSService) GetConsole(user *model.User, vpsID uint) (map[string]string
 func hashString(s string) string {
 	h := sha256.Sum256([]byte(s))
 	return hex.EncodeToString(h[:])
+}
+
+// generateRandomIP generates a random private IP address in 10.x.x.x range
+func generateRandomIP() string {
+	b := make([]byte, 3)
+	rand.Read(b)
+	return fmt.Sprintf("10.%d.%d.%d", b[0], b[1], b[2])
 }

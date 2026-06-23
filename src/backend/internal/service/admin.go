@@ -97,6 +97,8 @@ func (s *BillService) Recharge(user *model.User, amount float64) error {
 		return errors.New("invalid amount")
 	}
 
+	var balanceAfter float64
+
 	// Update balance
 	if user.CompanyID != nil {
 		company, err := s.companyRepo.FindByID(*user.CompanyID)
@@ -104,16 +106,31 @@ func (s *BillService) Recharge(user *model.User, amount float64) error {
 			return err
 		}
 		company.Balance += amount
+		balanceAfter = company.Balance
 		s.companyRepo.Update(company)
+	} else {
+		// For individual users, calculate balance from bills
+		bills, err := s.billRepo.FindByUserID(user.ID)
+		if err != nil {
+			return err
+		}
+		var currentBalance float64
+		for _, b := range bills {
+			if b.BalanceAfter != 0 {
+				currentBalance = b.BalanceAfter
+			}
+		}
+		balanceAfter = currentBalance + amount
 	}
 
 	// Record bill
 	bill := &model.Bill{
-		UserID:    user.ID,
-		CompanyID: user.CompanyID,
-		Type:      "recharge",
-		Amount:    amount,
-		Description: "Account recharge",
+		UserID:       user.ID,
+		CompanyID:    user.CompanyID,
+		Type:         "recharge",
+		Amount:       amount,
+		BalanceAfter: balanceAfter,
+		Description:  "Account recharge",
 	}
 	return s.billRepo.Create(bill)
 }

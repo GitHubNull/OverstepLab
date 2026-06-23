@@ -46,6 +46,8 @@ func (r *VPSRepository) Update(vps *model.VPSInstance) error {
 }
 
 func (r *VPSRepository) Delete(id uint) error {
+	// Delete associated orders first to avoid foreign key constraint
+	r.db.Where("vps_id = ?", id).Delete(&model.Order{})
 	return r.db.Delete(&model.VPSInstance{}, id).Error
 }
 

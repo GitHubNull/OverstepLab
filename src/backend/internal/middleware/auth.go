@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"strings"
 	"time"
 
@@ -83,7 +85,11 @@ func handleAPIKeyAuth(c *gin.Context, tokenString, jwtSecret string) bool {
 	apiKeyRepo := repository.GetAPIKeyRepo()
 	userRepo := repository.GetUserRepo()
 
-	apiKey, err := apiKeyRepo.FindByValue(tokenString)
+	// Hash the raw API key before querying (database stores hashed values)
+	h := sha256.Sum256([]byte(tokenString))
+	hashedKey := hex.EncodeToString(h[:])
+
+	apiKey, err := apiKeyRepo.FindByValue(hashedKey)
 	if err != nil {
 		return false
 	}

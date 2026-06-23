@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/oversteplab/oversteplab/internal/common"
 	"github.com/oversteplab/oversteplab/internal/model"
 	"github.com/oversteplab/oversteplab/internal/repository"
@@ -25,6 +27,11 @@ func (s *UserService) UpdateProfile(userID uint, email, phone string) error {
 		return err
 	}
 	if email != "" {
+		// Check if email is already used by another user
+		existing, err := s.userRepo.FindByEmail(email)
+		if err == nil && existing.ID > 0 && existing.ID != userID {
+			return errors.New("email already in use")
+		}
 		user.Email = email
 	}
 	if phone != "" {
