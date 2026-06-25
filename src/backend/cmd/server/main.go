@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"log"
 	"mime"
+	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -61,9 +62,35 @@ func main() {
 				defer f.Close()
 				info, err := f.Stat()
 				if err == nil && !info.IsDir() {
-					contentType := mime.TypeByExtension(filePath)
+					ext := strings.ToLower(filepath.Ext(filePath))
+					contentType := mime.TypeByExtension(ext)
 					if contentType == "" {
-						contentType = "application/octet-stream"
+						switch ext {
+						case ".html":
+							contentType = "text/html; charset=utf-8"
+						case ".js":
+							contentType = "application/javascript"
+						case ".css":
+							contentType = "text/css"
+						case ".json":
+							contentType = "application/json"
+						case ".png":
+							contentType = "image/png"
+						case ".jpg", ".jpeg":
+							contentType = "image/jpeg"
+						case ".svg":
+							contentType = "image/svg+xml"
+						case ".woff2":
+							contentType = "font/woff2"
+						case ".woff":
+							contentType = "font/woff"
+						case ".ttf":
+							contentType = "font/ttf"
+						case ".eot":
+							contentType = "application/vnd.ms-fontobject"
+						default:
+							contentType = "application/octet-stream"
+						}
 					}
 					c.DataFromReader(200, info.Size(), contentType, f, nil)
 					return
