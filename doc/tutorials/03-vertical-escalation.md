@@ -10,9 +10,9 @@
 
 ### V-01: 只读成员控制 VPS 启停
 
-**目标**: 使用 `acme_viewer` 角色启动/停止 VPS。
+**目标**: 使用 `acme_viewer` 或 `globex_viewer` 角色启动/停止 VPS。
 
-1. 使用 `acme_viewer` / `pass123` 登录
+1. 使用 `acme_viewer` / `pass123` 或 `globex_viewer` / `pass123` 登录
 2. 界面上看不到 VPS 的启动/停止按钮
 3. 使用其他账户（如 acme_admin）获取一个 VPS ID
 4. 直接调用启停接口:
@@ -41,6 +41,8 @@ curl -X POST http://localhost:8080/api/v1/vps/1/reinstall \
   -H "Content-Type: application/json" \
   -d '{"os_image":"kali-linux"}'
 ```
+
+也可使用 `globex_finance` / `pass123` 进行测试。
 
 ### V-04: 个人用户调用平台管理接口
 

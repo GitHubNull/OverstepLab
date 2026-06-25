@@ -33,6 +33,7 @@
 - **端点**: `POST /api/v1/vps/:id/start`
 - **原因**: 服务层没有角色校验
 - **修复**: 要求 `operator` 或 `admin` 角色
+- **测试账户**: `acme_viewer` / `pass123` 或 `globex_viewer` / `pass123`
 
 ### V-02: 运维添加成员
 - **端点**: `POST /api/v1/company/members`
@@ -43,6 +44,7 @@
 - **端点**: `POST /api/v1/vps/:id/reinstall`
 - **原因**: 服务层没有角色校验
 - **修复**: 要求 `admin` 或 `individual`
+- **测试账户**: `acme_finance` / `pass123` 或 `globex_finance` / `pass123`
 
 ### V-04: 个人用户调用管理接口
 - **端点**: `GET /api/v1/admin/users`

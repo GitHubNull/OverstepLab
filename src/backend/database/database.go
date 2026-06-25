@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/glebarez/sqlite"
+	"github.com/oversteplab/oversteplab/database/seed"
 	"github.com/oversteplab/oversteplab/internal/model"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -54,7 +55,10 @@ func ReseedDatabase(dbPath string) error {
 	if err := AutoMigrate(); err != nil {
 		return err
 	}
-	// 重新填充种子数据（seed包需导出Seed函数）
+	// 重新填充种子数据
+	if err := seed.Seed(GetDB()); err != nil {
+		return err
+	}
 	return nil
 }
 

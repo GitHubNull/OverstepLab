@@ -61,14 +61,10 @@ chmod +x start.sh
 
 ```bash
 # 终端 1: 启动后端
-cd src/backend
-go mod tidy
-go run ./cmd/server/main.go
+cd src/backend && go mod tidy && go run ./cmd/server/main.go
 
 # 终端 2: 启动前端
-cd src/frontend
-pnpm install
-pnpm dev
+cd src/frontend && pnpm install && pnpm dev
 ```
 
 ### 方式三：生产模式 (单二进制)

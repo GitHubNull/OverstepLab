@@ -611,8 +611,10 @@ Company (1) ──── (N) Bill
 | acme_viewer     | pass123      | 企业用户     | viewer           | Acme Corp      |
 | globex_admin    | pass123      | 企业用户     | admin            | Globex Inc     |
 | globex_ops      | pass123      | 企业用户     | operator         | Globex Inc     |
-| alice           | pass123      | 个人用户     | -                | -              |
-| bob             | pass123      | 个人用户     | -                | -              |
+| globex_finance  | pass123      | 企业用户     | finance          | Globex Inc     |
+| globex_viewer   | pass123      | 企业用户     | viewer           | Globex Inc     |
+| alice           | pass123      | 个人用户     | individual       | -              |
+| bob             | pass123      | 个人用户     | individual       | -              |
 
 ### 9.2 预置 VPS 实例
 

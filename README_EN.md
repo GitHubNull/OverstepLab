@@ -61,7 +61,7 @@ Requires two terminals for frontend and backend.
 
 ```bash
 # Terminal 1: Start backend
-cd src/backend && go run ./cmd/server/main.go
+cd src/backend && go mod tidy && go run ./cmd/server/main.go
 
 # Terminal 2: Start frontend
 cd src/frontend && pnpm install && pnpm dev
@@ -89,17 +89,34 @@ docker-compose up --build
 | admin | admin123 | Platform Admin | platform_admin | - |
 | acme_admin | pass123 | Company | admin | Acme Corp |
 | acme_ops | pass123 | Company | operator | Acme Corp |
+| acme_finance | pass123 | Company | finance | Acme Corp |
+| acme_viewer | pass123 | Company | viewer | Acme Corp |
+| globex_admin | pass123 | Company | admin | Globex Inc |
+| globex_ops | pass123 | Company | operator | Globex Inc |
+| globex_finance | pass123 | Company | finance | Globex Inc |
+| globex_viewer | pass123 | Company | viewer | Globex Inc |
 | alice | pass123 | Individual | - | - |
+| bob | pass123 | Individual | - | - |
 
 ## Vulnerability List
 
 | ID | Category | Scenario | Difficulty |
 |----|----------|----------|------------|
 | H-01 | Horizontal IDOR | View other user's VPS by modifying ID | ★☆☆ |
+| H-02 | Horizontal IDOR | View other user's profile by modifying ID | ★☆☆ |
+| H-03 | Horizontal IDOR | View other user's order by modifying ID | ★☆☆ |
+| H-04 | Horizontal IDOR | View/reply other user's ticket by modifying ID | ★☆☆ |
+| H-05 | Horizontal IDOR | Delete other user's API Key by modifying ID | ★★☆ |
 | V-01 | Vertical | Viewer role controls VPS power | ★☆☆ |
+| V-02 | Vertical | Operator calls user management API to add member | ★★☆ |
+| V-03 | Vertical | Finance calls VPS reinstall API | ★★☆ |
+| V-04 | Vertical | Individual user calls platform admin API | ★★☆ |
+| V-05 | Vertical | Operator upgrades self role to admin | ★★★ |
 | C-01 | Context | Cross-company VPS operation | ★★☆ |
+| C-02 | Context | Individual user creates company member | ★★★ |
+| C-03 | Context | Revoked API Key still accessible | ★★★ |
 
-See full list in [README.md](README.md) or `doc/tutorials/06-writeups.md`.
+See full details in `doc/tutorials/06-writeups.md`.
 
 ## License
 

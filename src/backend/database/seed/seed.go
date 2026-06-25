@@ -41,8 +41,10 @@ func Seed(db *gorm.DB) error {
 			{ID: 5, Username: "acme_viewer", PasswordHash: mustHash("pass123"), Email: "viewer@acme.com", UserType: "company", CompanyID: ptrUint(1), Role: "viewer", Status: "active"},
 			{ID: 6, Username: "globex_admin", PasswordHash: mustHash("pass123"), Email: "admin@globex.com", UserType: "company", CompanyID: ptrUint(2), Role: "admin", Status: "active"},
 			{ID: 7, Username: "globex_ops", PasswordHash: mustHash("pass123"), Email: "ops@globex.com", UserType: "company", CompanyID: ptrUint(2), Role: "operator", Status: "active"},
-			{ID: 8, Username: "alice", PasswordHash: mustHash("pass123"), Email: "alice@example.com", UserType: "individual", Status: "active"},
-			{ID: 9, Username: "bob", PasswordHash: mustHash("pass123"), Email: "bob@example.com", UserType: "individual", Status: "active"},
+			{ID: 8, Username: "alice", PasswordHash: mustHash("pass123"), Email: "alice@example.com", UserType: "individual", Role: "individual", Status: "active"},
+			{ID: 9, Username: "bob", PasswordHash: mustHash("pass123"), Email: "bob@example.com", UserType: "individual", Role: "individual", Status: "active"},
+			{ID: 10, Username: "globex_finance", PasswordHash: mustHash("pass123"), Email: "finance@globex.com", UserType: "company", CompanyID: ptrUint(2), Role: "finance", Status: "active"},
+			{ID: 11, Username: "globex_viewer", PasswordHash: mustHash("pass123"), Email: "viewer@globex.com", UserType: "company", CompanyID: ptrUint(2), Role: "viewer", Status: "active"},
 		}
 		for _, u := range users {
 			tx.Create(&u)
@@ -58,6 +60,8 @@ func Seed(db *gorm.DB) error {
 			{ID: 5, Name: "globex-api-01", OwnerID: 7, CompanyID: ptrUint(2), CPU: 2, Memory: 4096, Disk: 100, Bandwidth: 50, IPAddress: "10.0.2.11", OSImage: "ubuntu-22.04", Status: "running", ExpireAt: expireAt},
 			{ID: 6, Name: "alice-personal-01", OwnerID: 8, CPU: 2, Memory: 4096, Disk: 50, Bandwidth: 50, IPAddress: "10.1.1.10", OSImage: "ubuntu-22.04", Status: "running", ExpireAt: expireAt},
 			{ID: 7, Name: "bob-personal-01", OwnerID: 9, CPU: 1, Memory: 2048, Disk: 30, Bandwidth: 30, IPAddress: "10.1.2.10", OSImage: "centos-8", Status: "stopped", ExpireAt: expireAt},
+			{ID: 8, Name: "globex-finance-01", OwnerID: 10, CompanyID: ptrUint(2), CPU: 2, Memory: 4096, Disk: 80, Bandwidth: 50, IPAddress: "10.0.2.20", OSImage: "ubuntu-22.04", Status: "running", ExpireAt: expireAt},
+			{ID: 9, Name: "globex-viewer-01", OwnerID: 11, CompanyID: ptrUint(2), CPU: 1, Memory: 2048, Disk: 40, Bandwidth: 30, IPAddress: "10.0.2.21", OSImage: "debian-12", Status: "running", ExpireAt: expireAt},
 		}
 		for _, v := range vpsList {
 			tx.Create(&v)
@@ -69,6 +73,8 @@ func Seed(db *gorm.DB) error {
 			{ID: 2, OrderNo: "ORD20240101002", UserID: 2, CompanyID: ptrUint(1), VPSID: ptrUint(2), Type: "purchase", Amount: 599.99, Status: "paid"},
 			{ID: 3, OrderNo: "ORD20240105001", UserID: 6, CompanyID: ptrUint(2), VPSID: ptrUint(4), Type: "purchase", Amount: 399.99, Status: "paid"},
 			{ID: 4, OrderNo: "ORD20240105002", UserID: 8, VPSID: ptrUint(6), Type: "purchase", Amount: 149.99, Status: "paid"},
+			{ID: 5, OrderNo: "ORD20240110001", UserID: 10, CompanyID: ptrUint(2), VPSID: ptrUint(8), Type: "purchase", Amount: 249.99, Status: "paid"},
+			{ID: 6, OrderNo: "ORD20240110002", UserID: 11, CompanyID: ptrUint(2), VPSID: ptrUint(9), Type: "purchase", Amount: 129.99, Status: "paid"},
 		}
 		for _, o := range orders {
 			tx.Create(&o)
@@ -79,6 +85,8 @@ func Seed(db *gorm.DB) error {
 			{ID: 1, CompanyID: ptrUint(1), UserID: 2, Type: "expense", Amount: -299.99, BalanceAfter: 49700.01, Description: "Purchase VPS acme-web-01"},
 			{ID: 2, CompanyID: ptrUint(1), UserID: 2, Type: "expense", Amount: -599.99, BalanceAfter: 49100.02, Description: "Purchase VPS acme-db-01"},
 			{ID: 3, UserID: 8, Type: "expense", Amount: -149.99, BalanceAfter: 850.01, Description: "Purchase VPS alice-personal-01"},
+			{ID: 4, CompanyID: ptrUint(2), UserID: 10, Type: "expense", Amount: -249.99, BalanceAfter: 29750.01, Description: "Purchase VPS globex-finance-01"},
+			{ID: 5, CompanyID: ptrUint(2), UserID: 11, Type: "expense", Amount: -129.99, BalanceAfter: 29620.02, Description: "Purchase VPS globex-viewer-01"},
 		}
 		for _, b := range bills {
 			tx.Create(&b)
@@ -88,6 +96,8 @@ func Seed(db *gorm.DB) error {
 		tickets := []model.Ticket{
 			{ID: 1, Title: "Cannot access VPS console", Content: "When I try to access the console for acme-web-01, it shows a connection error.", UserID: 2, CompanyID: ptrUint(1), Status: "open"},
 			{ID: 2, Title: "Billing question", Content: "I see an unexpected charge on my bill for last month.", UserID: 8, Status: "replied"},
+			{ID: 3, Title: "VNC console not responding", Content: "The VNC console for globex-finance-01 is not responding.", UserID: 10, CompanyID: ptrUint(2), Status: "open"},
+			{ID: 4, Title: "Access request", Content: "I need access to the monitoring dashboard for globex-viewer-01.", UserID: 11, CompanyID: ptrUint(2), Status: "open"},
 		}
 		for _, t := range tickets {
 			tx.Create(&t)
@@ -106,6 +116,7 @@ func Seed(db *gorm.DB) error {
 			{ID: 1, UserID: 2, Name: "Acme Production Key", KeyValue: hashKey("sk_acme_prod_abc123def456"), KeyPrefix: "sk_acme_p", Permissions: `["vps:read","vps:manage"]`, Status: "active"},
 			{ID: 2, UserID: 8, Name: "Alice Test Key", KeyValue: hashKey("sk_alice_test_789xyz"), KeyPrefix: "sk_alice_t", Permissions: `["vps:read"]`, Status: "active"},
 			{ID: 3, UserID: 6, Name: "Globex Revoked Key", KeyValue: hashKey("sk_globex_revoked_old"), KeyPrefix: "sk_globex_r", Permissions: `["vps:read","vps:manage"]`, Status: "revoked"},
+			{ID: 4, UserID: 11, Name: "Globex Viewer Key", KeyValue: hashKey("sk_globex_viewer_abc789"), KeyPrefix: "sk_globex_v", Permissions: `["vps:read"]`, Status: "active"},
 		}
 		for _, k := range apiKeys {
 			tx.Create(&k)
@@ -115,6 +126,8 @@ func Seed(db *gorm.DB) error {
 		logs := []model.AuditLog{
 			{UserID: 2, CompanyID: ptrUint(1), Action: "vps.create", ResourceType: "vps", ResourceID: 1, Detail: `{"name":"acme-web-01"}`, IPAddress: "192.168.1.100"},
 			{UserID: 8, Action: "vps.create", ResourceType: "vps", ResourceID: 6, Detail: `{"name":"alice-personal-01"}`, IPAddress: "192.168.2.50"},
+			{UserID: 10, CompanyID: ptrUint(2), Action: "vps.create", ResourceType: "vps", ResourceID: 8, Detail: `{"name":"globex-finance-01"}`, IPAddress: "192.168.3.10"},
+			{UserID: 11, CompanyID: ptrUint(2), Action: "vps.create", ResourceType: "vps", ResourceID: 9, Detail: `{"name":"globex-viewer-01"}`, IPAddress: "192.168.3.11"},
 		}
 		for _, l := range logs {
 			tx.Create(&l)

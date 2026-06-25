@@ -112,8 +112,11 @@ const error = ref(false)
 
 const testAccounts = [
   { user: 'admin', pass: 'admin123', role: '平台管理员', severity: 'danger' as const },
-  { user: 'acme_admin', pass: 'pass123', role: '企业管理员', severity: 'warn' as const },
-  { user: 'alice', pass: 'pass123', role: '个人用户', severity: 'info' as const },
+  { user: 'acme_admin', pass: 'pass123', role: 'Acme 企业管理员', severity: 'warn' as const },
+  { user: 'acme_viewer', pass: 'pass123', role: 'Acme 只读成员', severity: 'info' as const },
+  { user: 'globex_admin', pass: 'pass123', role: 'Globex 企业管理员', severity: 'warn' as const },
+  { user: 'globex_viewer', pass: 'pass123', role: 'Globex 只读成员', severity: 'info' as const },
+  { user: 'alice', pass: 'pass123', role: '个人用户', severity: 'success' as const },
 ]
 
 function fillLogin(user: string, pass: string) {
