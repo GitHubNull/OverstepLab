@@ -21,6 +21,7 @@ OverstepLab is a **privilege escalation testing range** simulating a multi-user 
 - 📋 **Complete WriteUps**: Detailed vulnerability analysis and remediation
 - 🔧 **One-Click Database Reset**: Restore initial state anytime
 - 📦 **Single Binary Deployment**: Go compiles with embedded frontend assets
+- 🚀 **Cross-Platform One-Click Scripts**: Windows (.bat/.ps1), Linux/macOS (.sh) double-click to run
 - 🐳 **Docker Support**: One-command container deployment
 
 ## Tech Stack
@@ -33,7 +34,30 @@ OverstepLab is a **privilege escalation testing range** simulating a multi-user 
 
 ## Quick Start
 
-### Development Mode
+### Option 1: One-Click Startup Scripts (Recommended)
+
+The easiest way to start. Automatically builds frontend, compiles backend, and starts the server.
+
+**Windows:**
+```powershell
+# Double-click to run
+start.bat
+# or
+start.ps1
+```
+
+**Linux / macOS:**
+```bash
+# Grant execute permission then run
+chmod +x start.sh
+./start.sh
+```
+
+Access `http://localhost:8080` after startup.
+
+### Option 2: Development Mode
+
+Requires two terminals for frontend and backend.
 
 ```bash
 # Terminal 1: Start backend
@@ -43,7 +67,7 @@ cd src/backend && go run ./cmd/server/main.go
 cd src/frontend && pnpm install && pnpm dev
 ```
 
-### Production (Single Binary)
+### Option 3: Production (Single Binary)
 
 ```bash
 make build
@@ -51,7 +75,7 @@ make build
 # Access http://localhost:8080
 ```
 
-### Docker
+### Option 4: Docker
 
 ```bash
 docker-compose up --build

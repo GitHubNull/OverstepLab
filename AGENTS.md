@@ -65,6 +65,11 @@ OverstepLab is a deliberately vulnerable privilege escalation testing range simu
 ## Development Workflow
 
 ```bash
+# Quick start (one command)
+./start.sh         # Linux/macOS
+start.bat          # Windows CMD
+start.ps1          # Windows PowerShell
+
 # Dev mode (two terminals)
 make dev-frontend  # Vite on :5173
 make dev-backend   # Go on :8080
