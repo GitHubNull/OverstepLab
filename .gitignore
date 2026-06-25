@@ -45,11 +45,5 @@ Thumbs.db
 # Temporary
 tmp/
 
-# TypeScript build info
-*.tsbuildinfo
-
-# Frontend dev config (personal proxy settings)
-src/frontend/vite.config.js
-
 # nul 文件
 nul
