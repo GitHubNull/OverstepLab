@@ -2,6 +2,18 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 格式，版本号基于 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.2.2] - 2026-06-29
+
+### 修复
+- 修复 Dockerfile 前端构建阶段缺少 pnpm-lock.yaml 导致 `pnpm install --frozen-lockfile` 失败
+- 修复 gen-release-notes.sh 脚本在 GitHub Actions 环境下的兼容性问题（替换关联数组为普通变量）
+- 添加 .gitattributes 强制 shell 脚本使用 LF 换行符
+
+## [0.2.1] - 2026-06-29
+
+### 修复
+- 修复 Dockerfile 中 Go 版本与 go.mod 不匹配（1.21 → 1.25）
+
 ## [0.2.0] - 2026-06-29
 
 ### 新增
@@ -39,6 +51,8 @@
 - TailwindCSS + PrimeVue 4 前端 UI 框架
 - 一键启动脚本（Windows CMD/PowerShell、Linux/macOS Shell）
 
+[0.2.2]: https://github.com/GitHubNull/OverstepLab/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/GitHubNull/OverstepLab/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/GitHubNull/OverstepLab/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/GitHubNull/OverstepLab/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/GitHubNull/OverstepLab/compare/v0.1.0...v0.1.1
