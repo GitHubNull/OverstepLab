@@ -59,7 +59,8 @@ for line in "${LINES[@]}"; do
   sha="${line%%|*}"
   msg="${line#*|}"
   # 解析前缀：type(scope)?!?:
-  if [[ "$msg" =~ ^([a-zA-Z]+)(\([^)]+\))?!?:\ (.+)$ ]]; then
+  pattern='^([a-zA-Z]+)(\([^)]+\))?!?:\ (.+)$'
+  if [[ "$msg" =~ $pattern ]]; then
     type="${BASH_REMATCH[1],,}"
     scope="${BASH_REMATCH[2]}"
     desc="${BASH_REMATCH[3]}"
