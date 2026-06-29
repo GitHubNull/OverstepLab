@@ -1,7 +1,7 @@
 # Stage 1: Frontend Builder
 FROM node:20-alpine AS frontend-builder
 WORKDIR /app/src/frontend
-COPY src/frontend/package.json ./
+COPY src/frontend/package.json src/frontend/pnpm-lock.yaml ./
 RUN npm install -g pnpm && pnpm install --frozen-lockfile
 COPY src/frontend/ ./
 RUN pnpm build
