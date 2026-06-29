@@ -115,10 +115,10 @@ if %errorlevel% neq 0 (
 echo [信息] 编译成功: %EXE_NAME%
 
 :: 检查端口占用
-netstat -ano | findstr :8080 >nul 2>&1
+netstat -ano | findstr :5000 >nul 2>&1
 if not errorlevel 1 (
-    echo [警告] 端口 8080 已被占用，尝试终止占用进程...
-    for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8080') do (
+    echo [警告] 端口 5000 已被占用，尝试终止占用进程...
+    for /f "tokens=5" %%a in ('netstat -ano ^| findstr :5000') do (
         taskkill /f /pid %%a >nul 2>&1
     )
     ping -n 2 127.0.0.1 >nul 2>&1
@@ -128,12 +128,12 @@ if not errorlevel 1 (
 echo.
 echo [5/5] 正在启动 OverstepLab 服务...
 set "GIN_MODE=release"
-echo [信息] 默认访问地址: http://localhost:8080
+echo [信息] 默认访问地址: http://localhost:5000
 echo [信息] 按 Ctrl+C 停止服务
 echo.
 echo ============================================
 echo   靶场已启动！请在浏览器中访问:
-echo   http://localhost:8080
+echo   http://localhost:5000
 echo ============================================
 echo.
 

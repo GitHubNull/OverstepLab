@@ -53,7 +53,7 @@ chmod +x start.sh
 ./start.sh
 ```
 
-Access `http://localhost:8080` after startup.
+Access `http://localhost:5000` after startup.
 
 ### Option 2: Development Mode
 
@@ -72,14 +72,14 @@ cd src/frontend && pnpm install && pnpm dev
 ```bash
 make build
 ./bin/oversteplab
-# Access http://localhost:8080
+# Access http://localhost:5000
 ```
 
 ### Option 4: Docker
 
 ```bash
 docker-compose up --build
-# Access http://localhost:8080
+# Access http://localhost:5000
 ```
 
 ## Pre-seeded Test Accounts

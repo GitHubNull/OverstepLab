@@ -160,16 +160,16 @@ Write-Host "[信息] 编译成功: $ExeName" -ForegroundColor Green
 # 启动服务
 Write-Host ""
 Write-Host "[5/5] 正在启动 OverstepLab 服务..." -ForegroundColor Yellow
-Write-Host "[信息] 默认访问地址: http://localhost:8080" -ForegroundColor Green
+Write-Host "[信息] 默认访问地址: http://localhost:5000" -ForegroundColor Green
 Write-Host "[信息] 按 Ctrl+C 停止服务" -ForegroundColor Green
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host "  靶场已启动！请在浏览器中访问:" -ForegroundColor Cyan
-Write-Host "  http://localhost:8080" -ForegroundColor Cyan
+Write-Host "  http://localhost:5000" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
-$env:OVERSTEPLAB_PORT = "8080"
+$env:OVERSTEPLAB_PORT = "5000"
 $env:GIN_MODE = "release"
 
 # 启动进程并等待

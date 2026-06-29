@@ -315,7 +315,7 @@ func (s *VPSService) GetConsoleView(tokenStr string, vpsID uint) (map[string]str
 	}
 
 	return map[string]string{
-		"url":        "ws://localhost:8080/ws/console/" + hex.EncodeToString([]byte(vps.IPAddress)),
+		"url":        "ws://localhost:5000/ws/console/" + hex.EncodeToString([]byte(vps.IPAddress)),
 		"token":      "mock-console-token",
 		"vps_id":     strconv.FormatUint(uint64(vps.ID), 10),
 		"status":     vps.Status,

@@ -72,7 +72,7 @@ start.ps1          # Windows PowerShell
 
 # Dev mode (two terminals)
 make dev-frontend  # Vite on :5173
-make dev-backend   # Go on :8080
+make dev-backend   # Go on :5000
 
 # Production build
 make build         # Frontend → embed dir → Go binary

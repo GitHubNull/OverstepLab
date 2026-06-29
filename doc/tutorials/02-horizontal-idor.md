@@ -21,7 +21,7 @@
 6. 发送修改后的请求
 
 ```bash
-curl http://localhost:8080/api/v1/vps/4 \
+curl http://localhost:5000/api/v1/vps/4 \
   -H "Authorization: Bearer <your-token>"
 ```
 
@@ -32,7 +32,7 @@ curl http://localhost:8080/api/v1/vps/4 \
 ### H-02: 查看他人个人信息
 
 ```bash
-curl http://localhost:8080/api/v1/users/8 \
+curl http://localhost:5000/api/v1/users/8 \
   -H "Authorization: Bearer <your-token>"
 ```
 
@@ -41,7 +41,7 @@ curl http://localhost:8080/api/v1/users/8 \
 ### H-03: 查看他人订单
 
 ```bash
-curl http://localhost:8080/api/v1/orders/3 \
+curl http://localhost:5000/api/v1/orders/3 \
   -H "Authorization: Bearer <your-token>"
 ```
 
@@ -51,13 +51,13 @@ curl http://localhost:8080/api/v1/orders/3 \
 
 查看:
 ```bash
-curl http://localhost:8080/api/v1/tickets/1 \
+curl http://localhost:5000/api/v1/tickets/1 \
   -H "Authorization: Bearer <your-token>"
 ```
 
 回复:
 ```bash
-curl -X POST http://localhost:8080/api/v1/tickets/1/reply \
+curl -X POST http://localhost:5000/api/v1/tickets/1/reply \
   -H "Authorization: Bearer <your-token>" \
   -H "Content-Type: application/json" \
   -d '{"content": "This is a test reply"}'
@@ -66,7 +66,7 @@ curl -X POST http://localhost:8080/api/v1/tickets/1/reply \
 ### H-05: 删除他人 API Key
 
 ```bash
-curl -X DELETE http://localhost:8080/api/v1/apikeys/2 \
+curl -X DELETE http://localhost:5000/api/v1/apikeys/2 \
   -H "Authorization: Bearer <your-token>"
 ```
 

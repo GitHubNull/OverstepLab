@@ -23,6 +23,6 @@ WORKDIR /app
 COPY --from=backend-builder /app/oversteplab .
 RUN mkdir -p /app/data
 ENV OVERSTEPLAB_DB_PATH=/app/data/oversteplab.db
-ENV OVERSTEPLAB_PORT=8080
-EXPOSE 8080
+ENV OVERSTEPLAB_PORT=5000
+EXPOSE 5000
 ENTRYPOINT ["./oversteplab"]

@@ -45,7 +45,7 @@ make build
 # 终端2: cd src/frontend && pnpm install && pnpm dev
 ```
 
-启动后访问 `http://localhost:8080`。
+启动后访问 `http://localhost:5000`。
 
 ## 首次登录
 

@@ -18,7 +18,7 @@
 4. 直接调用启停接口:
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/vps/1/start \
+curl -X POST http://localhost:5000/api/v1/vps/1/start \
   -H "Authorization: Bearer <viewer-token>"
 ```
 
@@ -27,7 +27,7 @@ curl -X POST http://localhost:8080/api/v1/vps/1/start \
 ### V-02: 运维人员添加企业成员
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/company/members \
+curl -X POST http://localhost:5000/api/v1/company/members \
   -H "Authorization: Bearer <ops-token>" \
   -H "Content-Type: application/json" \
   -d '{"username":"hacker","password":"pass123","email":"h@h.com","role":"viewer"}'
@@ -36,7 +36,7 @@ curl -X POST http://localhost:8080/api/v1/company/members \
 ### V-03: 财务人员重装 VPS 系统
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/vps/1/reinstall \
+curl -X POST http://localhost:5000/api/v1/vps/1/reinstall \
   -H "Authorization: Bearer <finance-token>" \
   -H "Content-Type: application/json" \
   -d '{"os_image":"kali-linux"}'
@@ -47,7 +47,7 @@ curl -X POST http://localhost:8080/api/v1/vps/1/reinstall \
 ### V-04: 个人用户调用平台管理接口
 
 ```bash
-curl http://localhost:8080/api/v1/admin/users \
+curl http://localhost:5000/api/v1/admin/users \
   -H "Authorization: Bearer <alice-token>"
 ```
 
@@ -55,11 +55,11 @@ curl http://localhost:8080/api/v1/admin/users \
 
 ```bash
 # 先获取自身用户 ID
-curl http://localhost:8080/api/v1/user/profile \
+curl http://localhost:5000/api/v1/user/profile \
   -H "Authorization: Bearer <ops-token>"
 
 # 修改自身角色为 admin
-curl -X PUT http://localhost:8080/api/v1/company/members/<your-id>/role \
+curl -X PUT http://localhost:5000/api/v1/company/members/<your-id>/role \
   -H "Authorization: Bearer <ops-token>" \
   -H "Content-Type: application/json" \
   -d '{"role":"admin"}'

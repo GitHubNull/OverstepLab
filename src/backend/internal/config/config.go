@@ -14,7 +14,7 @@ type Config struct {
 func Load() *Config {
 	port := os.Getenv("OVERSTEPLAB_PORT")
 	if port == "" {
-		port = "8080"
+		port = "5000"
 	}
 
 	dbPath := os.Getenv("OVERSTEPLAB_DB_PATH")

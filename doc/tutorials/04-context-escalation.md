@@ -14,7 +14,7 @@
 
 ```bash
 # 使用 Acme Corp 用户操作 Globex 的 VPS
-curl -X POST http://localhost:8080/api/v1/vps/4/stop \
+curl -X POST http://localhost:5000/api/v1/vps/4/stop \
   -H "Authorization: Bearer <acme-token>"
 ```
 
@@ -23,7 +23,7 @@ curl -X POST http://localhost:8080/api/v1/vps/4/stop \
 个人账户不属于任何企业，但在漏洞模式下可以调用企业成员管理接口。
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/company/members \
+curl -X POST http://localhost:5000/api/v1/company/members \
   -H "Authorization: Bearer <alice-token>" \
   -H "Content-Type: application/json" \
   -d '{"username":"newuser","password":"pass123","email":"n@n.com","role":"viewer"}'

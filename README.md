@@ -53,7 +53,7 @@ chmod +x start.sh
 ./start.sh
 ```
 
-启动后访问 `http://localhost:8080`。
+启动后访问 `http://localhost:5000`。
 
 ### 方式二：开发模式
 
@@ -75,14 +75,14 @@ make build
 
 # 运行
 ./bin/oversteplab
-# 访问 http://localhost:8080
+# 访问 http://localhost:5000
 ```
 
 ### 方式四：Docker 部署
 
 ```bash
 docker-compose up --build
-# 访问 http://localhost:8080
+# 访问 http://localhost:5000
 ```
 
 ## 预置测试账户
