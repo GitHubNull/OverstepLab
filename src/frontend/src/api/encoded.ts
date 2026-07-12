@@ -1,4 +1,4 @@
-import { apiClient } from './client'
+import apiClient from './client'
 
 export function encodeValue(type: string, value: string) {
   return apiClient.get(`/api/v1/encoded/${type}/encode`, { params: { value } })
