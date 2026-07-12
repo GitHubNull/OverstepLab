@@ -40,7 +40,7 @@
       </button>
     </div>
 
-    <!-- Global Encoding Challenge State Banner (admin managed) -->
+    <!-- Global Encoding Challenge State Banner -->
     <div
       v-if="encodingState.active"
       class="bg-[var(--primary-subtle)] border border-[var(--primary)]/20 rounded-xl p-4 flex items-center justify-between"
@@ -56,7 +56,17 @@
           </p>
         </div>
       </div>
-      <Tag :value="encodingState.encoding_type.toUpperCase()" severity="info" class="text-xs" />
+      <div class="flex items-center gap-2">
+        <Tag :value="encodingState.encoding_type.toUpperCase()" severity="info" class="text-xs" />
+        <Button
+          label="关闭"
+          icon="pi pi-times"
+          text
+          size="small"
+          severity="secondary"
+          @click="deactivateEncodingChallenge()"
+        />
+      </div>
     </div>
 
     <!-- Challenges Grid -->
@@ -128,6 +138,16 @@
               severity="success"
               class="!text-xs"
               @click="markComplete(ch)"
+            />
+            <Button
+              v-if="ch.category.includes('编码加密')"
+              :label="encodingState.active && encodingState.challenge_id === ch.id ? '关闭' : '激活'"
+              :icon="encodingState.active && encodingState.challenge_id === ch.id ? 'pi pi-times' : 'pi pi-play'"
+              text
+              size="small"
+              severity="info"
+              class="!text-xs"
+              @click="toggleEncodingChallenge(ch)"
             />
           </div>
         </div>
@@ -285,6 +305,57 @@ async function markComplete(ch: Challenge) {
     toast.add({ severity: 'success', summary: '恭喜', detail: `已完成挑战 ${ch.id}`, life: 2000 })
   } catch (e: any) {
     toast.add({ severity: 'error', summary: '错误', detail: '标记失败', life: 3000 })
+  }
+}
+
+async function toggleEncodingChallenge(ch: Challenge) {
+  const isActive = encodingState.value.active && encodingState.value.challenge_id === ch.id
+  try {
+    await api.setEncodingChallengeState({
+      challenge_id: ch.id,
+      encoding_type: ch.encoding_type || 'base64',
+      challenge_name: ch.title,
+      active: !isActive,
+    })
+    encodingState.value = {
+      active: !isActive,
+      challenge_id: !isActive ? ch.id : null,
+      encoding_type: !isActive ? (ch.encoding_type || 'base64') : 'none',
+      challenge_name: !isActive ? ch.title : null,
+    }
+    toast.add({
+      severity: 'success',
+      summary: !isActive ? '已激活' : '已关闭',
+      detail: `编码挑战 ${ch.id}: ${ch.title} ${!isActive ? '已激活' : '已关闭'}`,
+      life: 2000,
+    })
+  } catch (e: any) {
+    toast.add({
+      severity: 'error',
+      summary: '操作失败',
+      detail: e.response?.data?.message || '无法更新编码挑战状态',
+      life: 3000,
+    })
+  }
+}
+
+async function deactivateEncodingChallenge() {
+  try {
+    await api.setEncodingChallengeState({
+      challenge_id: encodingState.value.challenge_id || '',
+      encoding_type: encodingState.value.encoding_type,
+      challenge_name: encodingState.value.challenge_name || '',
+      active: false,
+    })
+    encodingState.value = { active: false, challenge_id: null, encoding_type: 'none', challenge_name: null }
+    toast.add({ severity: 'success', summary: '已关闭', detail: '编码挑战已关闭', life: 2000 })
+  } catch (e: any) {
+    toast.add({
+      severity: 'error',
+      summary: '关闭失败',
+      detail: e.response?.data?.message || '无法关闭编码挑战',
+      life: 3000,
+    })
   }
 }
 </script>

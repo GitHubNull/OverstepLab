@@ -130,4 +130,4 @@ export const getEncodingChallengeState = () =>
   apiClient.get<ApiResponse<{ active: boolean; challenge_id: string | null; encoding_type: string; challenge_name: string | null }>>('/encoding-challenge-state')
 
 export const setEncodingChallengeState = (data: { challenge_id: string; encoding_type: string; challenge_name: string; active: boolean }) =>
-  apiClient.put<ApiResponse>('/admin/encoding-challenge-state', data)
+  apiClient.put<ApiResponse>('/encoding-challenge-state', data)
