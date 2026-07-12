@@ -16,8 +16,9 @@ OverstepLab is a deliberately vulnerable privilege escalation testing range simu
   - `internal/service/` - Business logic with vulnerability branching
   - `internal/repository/` - Data access layer
   - `internal/model/` - GORM structs
-  - `internal/middleware/` - JWT auth, RBAC, CORS, audit logging
-  - `internal/vuln/` - Security mode toggle and challenge metadata
+  - `internal/middleware/` - JWT auth, RBAC, CORS, audit logging, encoding middleware
+  - `internal/crypto/` - Cryptography utilities (classical, modern, SM, encoding, signing, big integer)
+  - `internal/vuln/` - Security mode toggle and challenge metadata (22 challenges)
   - `internal/web/` - Embedded frontend assets
 
 ### Frontend (Vue 3)
@@ -25,17 +26,20 @@ OverstepLab is a deliberately vulnerable privilege escalation testing range simu
 - **UI**: PrimeVue 4
 - **State**: Pinia
 - **Build**: Vite
+- **Styling**: TailwindCSS 4
+- **Crypto Libraries**: crypto-js, sm-crypto, jsencrypt, base-x
 - **Structure**:
-  - `src/api/` - Axios wrappers
-  - `src/stores/` - Pinia stores
-  - `src/views/` - Page components
+  - `src/api/` - Axios wrappers (including crypto/encoded API clients)
+  - `src/stores/` - Pinia stores (including encodingChallenge state)
+  - `src/views/` - Page components (including tools/ views)
   - `src/router/` - Vue Router with auth guards
 
 ### Key Files
 - `src/backend/cmd/server/main.go` - Entry point, DB init, server start
 - `src/backend/internal/vuln/mode.go` - Security mode toggle
-- `src/backend/internal/vuln/challenges.go` - Challenge metadata (13 vulnerabilities)
+- `src/backend/internal/vuln/challenges.go` - Challenge metadata (22 vulnerabilities: H-01~H-05, V-01~V-05, C-01~C-03, E-01~E-09)
 - `src/backend/internal/web/embed.go` - `//go:embed` directive for frontend
+- `src/backend/router/router.go` - All API routes including `/encoded/*`, `/crypto/*`, encoding challenge state endpoints
 
 ## Coding Conventions
 
@@ -77,3 +81,4 @@ make dev-backend   # Go on :5000
 # Production build
 make build         # Frontend → embed dir → Go binary
 ```
+

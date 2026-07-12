@@ -2,6 +2,16 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 格式，版本号基于 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.3.2] - 2026-07-12
+
+### 文档
+- 同步更新 README（中英文）至 v0.3.x 功能状态：22 个漏洞挑战、Go 1.25+、主题切换、编码加密模块等
+- 更新 SECURITY.md 安全声明，补充编码加密挑战相关安全说明
+- 更新 PRD 文档至 22 个挑战、新增 crypto 模块和 encoding 中间件描述
+- 更新品牌指南文档（`doc/brand-guidelines.md`）
+- 更新使用教程索引及一键启动/快速开始教程中的端口和功能描述
+- 新增两个 Globex 企业测试账号（`globex_finance`、`globex_viewer`）至使用文档
+
 ## [0.3.1] - 2026-07-12
 
 ### 修复
@@ -10,27 +20,33 @@
 ## [0.3.0] - 2026-07-12
 
 ### 新增
-- 编码加密越权挑战扩展：新增 6 个编码/加密相关漏洞挑战（E-07 至 E-12）
-  - E-07 Base64 编码绕过权限校验
-  - E-08 URL 编码绕过参数过滤
-  - E-09 哈希签名验证绕过
-  - E-10 JWT 弱密钥破解
-  - E-11 AES-CBC 位翻转攻击
-  - E-12 经典密码（凯撒/维吉尼亚）编码绕过
+- 编码加密越权挑战扩展：新增 9 个编码/加密相关漏洞挑战（E-01 至 E-09）
+  - E-01 Base64 编码参数绕过
+  - E-02 Base32 编码参数绕过
+  - E-03 凯撒密码参数偏移绕过
+  - E-04 自定义 Base64 编码表绕过
+  - E-05 多层嵌套编码参数绕过
+  - E-06 AES-256-GCM 加密参数绕过
+  - E-07 HMAC-SHA256 签名验证绕过
+  - E-08 SM4-CBC 国密加密参数绕过
+  - E-09 MD5 哈希签名验证绕过
 - 后端新增 `internal/crypto/` 密码学工具模块（经典密码、现代加密、编码、国密 SM2/SM3/SM4、大整数运算、签名验证）
 - 新增 `encoded_handler.go` 处理编码挑战 API 端点
 - 新增 `encoding.go` 中间件支持多种编码格式自动检测与解码
 - 前端新增编码挑战状态管理 (`encodingChallenge` store)
-- 前端新增 `tools/` 视图（编码转换、加解密工具箱）
-- 前端新增 `crypto.ts` / `encoded.ts` API 客户端
+- 前端新增 `crypto.ts` 编码工具库（用于编码挑战的自动请求编码，暴露 `window.CryptoUtils` 供控制台调用）
+- 前端新增 `encoded.ts` API 客户端
 - 新增教程文档 `07-encoding-crypto.md`
+- 新增主题切换功能（浅色/深色/跟随系统）
+- 前端引入 TailwindCSS 4 和 crypto-js、sm-crypto、jsencrypt、base-x 等密码学库
 
 ### 变更
 - API 客户端 (`client.ts`) 重构以支持编码挑战的请求拦截与自动编码转换
-- 路由 (`router.go`) 扩展编码挑战相关端点
-- 挑战元数据 (`challenges.go`) 大幅扩展以支持编码/加密类挑战
-- 前端导航栏新增"工具箱"入口
+- 路由 (`router.go`) 扩展编码挑战相关端点 (`/encoded/*`, `/crypto/*`)
+- 挑战元数据 (`challenges.go`) 大幅扩展以支持编码/加密类挑战（22 个挑战）
+- 前端导航栏新增编码挑战入口
 - PRD 文档和教程索引同步更新
+- 所有项目文档同步更新（README 中英文、AGENTS.md、CHANGELOG、SECURITY.md 等）
 
 ### 修复
 - 前端多处视图细节修正（VPS 详情、工单列表/详情、Dashboard、挑战页）
@@ -84,6 +100,9 @@
 - TailwindCSS + PrimeVue 4 前端 UI 框架
 - 一键启动脚本（Windows CMD/PowerShell、Linux/macOS Shell）
 
+[0.3.2]: https://github.com/GitHubNull/OverstepLab/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/GitHubNull/OverstepLab/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/GitHubNull/OverstepLab/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/GitHubNull/OverstepLab/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/GitHubNull/OverstepLab/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/GitHubNull/OverstepLab/compare/v0.1.2...v0.2.0
