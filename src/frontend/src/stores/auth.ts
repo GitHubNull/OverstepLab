@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { login as apiLogin, register as apiRegister, getProfile, logout as apiLogout } from '@/api/auth'
 import { getSecurityMode } from '@/api'
+import { refreshEncodingState } from '@/api/client'
 import type { User } from '@/types'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -28,6 +29,8 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('token', loginData.token)
     localStorage.setItem('refresh_token', loginData.refresh_token)
     localStorage.setItem('user', JSON.stringify(loginData.user))
+    // Refresh encoding state after login (now we have a valid token)
+    await refreshEncodingState()
   }
 
   async function register(formData: { username: string; password: string; email: string; phone?: string; user_type: string; company_name?: string }) {
@@ -85,6 +88,7 @@ export const useAuthStore = defineStore('auth', () => {
     // 未登录时不请求需要认证的安全模式接口，避免在登录/注册页触发 401 重定向循环
     if (storedToken) {
       await syncSecurityMode()
+      await refreshEncodingState()
     }
   }
 

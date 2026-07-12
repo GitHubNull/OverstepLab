@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/oversteplab/oversteplab/database"
@@ -495,6 +496,92 @@ func (h *ChallengeHandler) SetSecurityMode(c *gin.Context) {
 	}
 	vuln.SetSecureMode(input.Mode == "secure")
 	common.SuccessMessage(c, "Security mode updated to "+vuln.GetModeString())
+}
+
+// ---- Encoding Challenge State Management (Admin managed, persistent) ----
+
+// GetEncodingChallengeState returns the globally active encoding challenge state
+func (h *ChallengeHandler) GetEncodingChallengeState(c *gin.Context) {
+	repo := repository.GetSystemConfigRepo()
+	cfg, err := repo.FindByKey("active_encoding_challenge")
+	if err != nil {
+		// No active challenge
+		common.Success(c, gin.H{
+			"active":         false,
+			"challenge_id":     nil,
+			"encoding_type":    "none",
+			"challenge_name":   nil,
+		})
+		return
+	}
+
+	// Parse stored value: "challenge_id:encoding_type:challenge_name"
+	parts := strings.Split(cfg.Value, ":")
+	if len(parts) >= 2 {
+		common.Success(c, gin.H{
+			"active":       true,
+			"challenge_id": parts[0],
+			"encoding_type": parts[1],
+			"challenge_name": func() string {
+				if len(parts) >= 3 {
+					return strings.Join(parts[2:], ":")
+				}
+				return ""
+			}(),
+		})
+		return
+	}
+
+	common.Success(c, gin.H{
+		"active":       false,
+		"challenge_id": nil,
+		"encoding_type": "none",
+		"challenge_name": nil,
+	})
+}
+
+// SetEncodingChallengeState sets the globally active encoding challenge (admin only)
+func (h *ChallengeHandler) SetEncodingChallengeState(c *gin.Context) {
+	var input struct {
+		ChallengeID   string `json:"challenge_id"`
+		EncodingType  string `json:"encoding_type"`
+		ChallengeName string `json:"challenge_name"`
+		Active        bool   `json:"active"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+
+	repo := repository.GetSystemConfigRepo()
+	if !input.Active || input.ChallengeID == "" || input.EncodingType == "" {
+		// Deactivate
+		repo.Upsert("active_encoding_challenge", "")
+		common.SuccessMessage(c, "Encoding challenge deactivated")
+		return
+	}
+
+	// Validate encoding type
+	validTypes := map[string]bool{
+		"base64": true, "base32": true, "caesar": true, "custom-base64": true,
+		"multi": true, "aes": true, "hmac": true, "sm4": true, "hash-sign": true,
+	}
+	if !validTypes[input.EncodingType] {
+		common.BadRequest(c, "Invalid encoding type: "+input.EncodingType)
+		return
+	}
+
+	value := fmt.Sprintf("%s:%s:%s", input.ChallengeID, input.EncodingType, input.ChallengeName)
+	if err := repo.Upsert("active_encoding_challenge", value); err != nil {
+		common.InternalError(c, err.Error())
+		return
+	}
+	common.Success(c, gin.H{
+		"message":        "Encoding challenge activated",
+		"challenge_id":   input.ChallengeID,
+		"encoding_type":  input.EncodingType,
+		"challenge_name": input.ChallengeName,
+	})
 }
 
 func (h *ChallengeHandler) ResetDatabase(c *gin.Context) {

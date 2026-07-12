@@ -40,6 +40,25 @@
       </button>
     </div>
 
+    <!-- Global Encoding Challenge State Banner (admin managed) -->
+    <div
+      v-if="encodingState.active"
+      class="bg-[var(--primary-subtle)] border border-[var(--primary)]/20 rounded-xl p-4 flex items-center justify-between"
+    >
+      <div class="flex items-center gap-3">
+        <i class="pi pi-lock text-[var(--primary)]"></i>
+        <div>
+          <p class="text-sm font-semibold text-[var(--primary)]">
+            编码挑战已激活: {{ encodingState.challenge_name || encodingState.challenge_id }}
+          </p>
+          <p class="text-xs text-[var(--text-secondary)]">
+            编码类型: {{ encodingState.encoding_type }} — 所有业务请求将自动编码参数
+          </p>
+        </div>
+      </div>
+      <Tag :value="encodingState.encoding_type.toUpperCase()" severity="info" class="text-xs" />
+    </div>
+
     <!-- Challenges Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       <div
@@ -165,6 +184,14 @@ const writeupDialogVisible = ref(false)
 const selectedChallenge = ref<Challenge | null>(null)
 const challengeDetail = ref<ChallengeDetail | null>(null)
 
+// Global encoding state (managed by backend admin)
+const encodingState = ref({
+  active: false,
+  challenge_id: null as string | null,
+  encoding_type: 'none',
+  challenge_name: null as string | null,
+})
+
 const categories = [
   { label: '全部', value: 'all' },
   { label: '水平越权', value: '水平越权' },
@@ -180,8 +207,14 @@ const maxDifficulty = computed(() => {
 
 onMounted(async () => {
   try {
-    const response = await api.getChallenges()
-    challenges.value = response.data.data!
+    const [chRes, encRes] = await Promise.all([
+      api.getChallenges(),
+      api.getEncodingChallengeState().catch(() => null),
+    ])
+    challenges.value = chRes.data.data!
+    if (encRes?.data?.data) {
+      encodingState.value = encRes.data.data
+    }
   } catch (e: any) {
     toast.add({
       severity: 'error',

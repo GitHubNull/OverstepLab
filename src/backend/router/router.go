@@ -173,6 +173,10 @@ func Setup(cfg *config.Config) *gin.Engine {
 		authGroup.GET("/security-mode", challengeHandler.GetSecurityMode)
 		authGroup.PUT("/security-mode", challengeHandler.SetSecurityMode)
 
+		// Encoding challenge state (admin managed, persistent)
+		authGroup.GET("/encoding-challenge-state", challengeHandler.GetEncodingChallengeState)
+		admin.PUT("/encoding-challenge-state", challengeHandler.SetEncodingChallengeState)
+
 		// Encoded challenge routes (encoding/encryption wrapper endpoints)
 		encoded := authGroup.Group("/encoded")
 		{
