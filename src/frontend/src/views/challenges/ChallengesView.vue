@@ -170,6 +170,7 @@ const categories = [
   { label: '水平越权', value: '水平越权' },
   { label: '垂直越权', value: '垂直越权' },
   { label: '上下文越权', value: '上下文越权' },
+  { label: '编码加密', value: '编码加密' },
 ]
 
 const maxDifficulty = computed(() => {
