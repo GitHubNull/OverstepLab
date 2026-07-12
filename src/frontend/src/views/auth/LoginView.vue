@@ -10,8 +10,8 @@
       <div class="rounded-2xl p-8 shadow-2xl shadow-black/40 bg-[rgba(10,10,10,0.88)] backdrop-blur-xl border border-white/[0.08]">
         <!-- Logo -->
         <div class="text-center mb-7">
-          <div class="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl shadow-lg shadow-indigo-500/20 mb-4">
-            <i class="pi pi-shield text-2xl text-white"></i>
+          <div class="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl shadow-lg shadow-indigo-500/20 mb-4 overflow-hidden">
+            <img src="/logo/logo-icon.svg" alt="OverstepLab Logo" class="w-10 h-10" />
           </div>
           <h1 class="text-2xl font-bold text-white mb-1">OverstepLab</h1>
           <p class="text-sm text-neutral-400">越权漏洞测试靶场</p>

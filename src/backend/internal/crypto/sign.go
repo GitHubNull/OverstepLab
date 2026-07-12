@@ -3,139 +3,72 @@ package crypto
 import (
 	"crypto/hmac"
 	"crypto/md5"
-	"crypto/sha1"
 	"crypto/sha256"
-	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 )
 
-// ---- Hash functions ----
-
-func MD5Hash(data []byte) string {
-	h := md5.Sum(data)
+// MD5Hash 计算MD5哈希
+func MD5Hash(data string) string {
+	h := md5.Sum([]byte(data))
 	return hex.EncodeToString(h[:])
 }
 
-func SHA1Hash(data []byte) string {
-	h := sha1.Sum(data)
+// SHA256Hash 计算SHA256哈希
+func SHA256Hash(data string) string {
+	h := sha256.Sum256([]byte(data))
 	return hex.EncodeToString(h[:])
 }
 
-func SHA256Hash(data []byte) string {
-	h := sha256.Sum256(data)
-	return hex.EncodeToString(h[:])
-}
-
-// ---- HMAC-SHA256 Signature ----
-
-var hmacKey = []byte("OverstepLabHMACSecretKey!@#2024")
-
-// HMACSHA256Sign creates an HMAC-SHA256 signature for the given data.
-func HMACSHA256Sign(data []byte) string {
-	mac := hmac.New(sha256.New, hmacKey)
-	mac.Write(data)
-	return hex.EncodeToString(mac.Sum(nil))
-}
-
-// HMACSHA256Verify verifies the HMAC-SHA256 signature.
-func HMACSHA256Verify(data []byte, signature string) bool {
-	expected := HMACSHA256Sign(data)
-	return hmac.Equal([]byte(expected), []byte(signature))
-}
-
-// GetHMACKey returns the HMAC key as base64 (for challenge hints).
-func GetHMACKeyBase64() string {
-	return base64.StdEncoding.EncodeToString(hmacKey)
-}
-
-// ---- Signed Parameter Encoding ----
-
-// EncodeSignedParam encodes a value with an HMAC signature: base64(data) + "." + hex(hmac(data))
-func EncodeSignedParam(value string) string {
-	data := []byte(value)
-	encoded := base64.StdEncoding.EncodeToString(data)
-	sig := HMACSHA256Sign(data)
-	return encoded + "." + sig
-}
-
-// DecodeSignedParam decodes a signed parameter and verifies the signature.
-func DecodeSignedParam(encoded string) ([]byte, error) {
-	parts := strings.SplitN(encoded, ".", 2)
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("signed: invalid format, expected base64data.signature")
-	}
-
-	data, err := base64.StdEncoding.DecodeString(parts[0])
-	if err != nil {
-		return nil, fmt.Errorf("signed: invalid base64 data: %w", err)
-	}
-
-	signature := parts[1]
-	if !HMACSHA256Verify(data, signature) {
-		return nil, fmt.Errorf("signed: HMAC signature verification failed")
-	}
-
-	return data, nil
-}
-
-// ---- Simple Hash Signature (MD5/SHA256) ----
-// Real-world style: pack all params into a sorted string, compute MD5+salt, put in header X-Hash-Sign
-// Used for E-09 challenge: simple hash integrity check bypass
-
-var hashSalt = []byte("OverstepLabHashSalt2024")
-
-// SerializeParams packs params into a sorted key=value&key2=value2 string (same as frontend)
-func SerializeParams(data map[string]interface{}) string {
-	var entries []string
-	for key, value := range data {
-		var valStr string
-		switch v := value.(type) {
-		case string:
-			valStr = v
-		case float64:
-			valStr = strconv.FormatFloat(v, 'f', -1, 64)
-		case int, int64, uint, uint64:
-			valStr = fmt.Sprintf("%v", v)
-		case bool:
-			valStr = strconv.FormatBool(v)
-		default:
-			valStr = fmt.Sprintf("%v", v)
-		}
-		entries = append(entries, key+"="+valStr)
-	}
-	sort.Strings(entries)
-	return strings.Join(entries, "&")
-}
-
-// ComputeHashSign computes MD5(payload + salt) — same algorithm as frontend
-func ComputeHashSign(payload string) string {
-	h := md5.Sum([]byte(payload + string(hashSalt)))
-	return hex.EncodeToString(h[:])
-}
-
-// ComputeHmacSign computes HMAC-SHA256(payload) — same algorithm as frontend
-func ComputeHmacSign(payload string) string {
-	mac := hmac.New(sha256.New, hmacKey)
+// HMACSHA256Sign 计算HMAC-SHA256签名
+func HMACSHA256Sign(key string, payload string) string {
+	mac := hmac.New(sha256.New, []byte(key))
 	mac.Write([]byte(payload))
 	return hex.EncodeToString(mac.Sum(nil))
 }
 
-// VerifyHashSign verifies the X-Hash-Sign header against the given params
-func VerifyHashSign(params map[string]interface{}, sign string) bool {
-	expected := ComputeHashSign(SerializeParams(params))
-	return strings.EqualFold(sign, expected)
+// HMACSHA256Verify 验证HMAC-SHA256签名
+func HMACSHA256Verify(key string, payload string, signature string) bool {
+	expected := HMACSHA256Sign(key, payload)
+	return hmac.Equal([]byte(expected), []byte(signature))
 }
 
-// GetHashSalt returns the hash salt for challenge participants.
-func GetHashSalt() []byte {
-	return hashSalt
+// ComputeHashSign 计算 value:md5(value|salt) 格式的哈希签名
+// 这是旧式签名，仅用于E-09挑战教学
+func ComputeHashSign(value string, salt string) string {
+	hashStr := value + "|" + salt
+	return fmt.Sprintf("%s:%s", value, MD5Hash(hashStr))
 }
 
-// SignID signs a numeric ID for use in signed challenges.
-func SignID(id uint) string {
-	return EncodeSignedParam(fmt.Sprintf("%d", id))
+// VerifyHashSign 验证 value:md5格式的哈希签名
+func VerifyHashSign(signedValue string, salt string) bool {
+	idx := strings.LastIndex(signedValue, ":")
+	if idx < 0 {
+		return false
+	}
+	value := signedValue[:idx]
+	expected := ComputeHashSign(value, salt)
+	return signedValue == expected
+}
+
+// SortParams 将map参数排序后拼接为字符串，用于签名计算
+func SortParams(params map[string]string) string {
+	keys := make([]string, 0, len(params))
+	for k := range params {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	var parts []string
+	for _, k := range keys {
+		parts = append(parts, fmt.Sprintf("%s=%s", k, params[k]))
+	}
+	return strings.Join(parts, "&")
+}
+
+// ComputeBodyHashSign 计算请求体的哈希签名
+// 用于E-09挑战的整体签名机制
+func ComputeBodyHashSign(body string, salt string) string {
+	return MD5Hash(body + "|" + salt)
 }

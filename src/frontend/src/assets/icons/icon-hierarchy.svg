@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-labelledby="icon-title icon-desc">
+  <title id="icon-title">Hierarchy</title>
+  <desc id="icon-desc">权限层级图标：三层金字塔结构</desc>
+
+  <!-- 顶层 -->
+  <rect x="9" y="3" width="6" height="4" rx="1" fill="none" stroke="#818cf8" stroke-width="2" />
+
+  <!-- 中层 -->
+  <rect x="6" y="9" width="12" height="4" rx="1" fill="none" stroke="#6366f1" stroke-width="2" />
+
+  <!-- 底层 -->
+  <rect x="3" y="15" width="18" height="4" rx="1" fill="none" stroke="#4f46e5" stroke-width="2" />
+
+  <!-- 连接线 -->
+  <line x1="12" y1="7" x2="12" y2="9" stroke="#818cf8" stroke-width="1.5" />
+  <line x1="12" y1="13" x2="12" y2="15" stroke="#6366f1" stroke-width="1.5" />
+</svg>

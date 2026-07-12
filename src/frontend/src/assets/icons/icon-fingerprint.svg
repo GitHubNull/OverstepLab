@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-labelledby="icon-title icon-desc">
+  <title id="icon-title">Fingerprint</title>
+  <desc id="icon-desc">身份/认证图标：指纹图案</desc>
+
+  <!-- 指纹外轮廓 -->
+  <path d="M12 3 C7 3 4 7 4 12 C4 16 5 19 6 21" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" />
+  <path d="M12 3 C17 3 20 7 20 12 C20 16 19 19 18 21" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" />
+
+  <!-- 指纹纹路 -->
+  <path d="M12 6 C9 6 7 8 7 12 C7 15 8 17 8 18" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M12 6 C15 6 17 8 17 12 C17 15 16 17 16 18" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" />
+
+  <path d="M12 9 C10.5 9 9.5 10 9.5 12 C9.5 14 10 15 10 16" fill="none" stroke="#a5b4fc" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M12 9 C13.5 9 14.5 10 14.5 12 C14.5 14 14 15 14 16" fill="none" stroke="#a5b4fc" stroke-width="1.5" stroke-linecap="round" />
+
+  <!-- 中心螺旋 -->
+  <path d="M12 12 C11 12 11 13 12 13 C13 13 13 12 12 12" fill="none" stroke="#c7d2fe" stroke-width="1.5" stroke-linecap="round" />
+</svg>

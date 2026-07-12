@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-labelledby="icon-title icon-desc">
+  <title id="icon-title">Eye Crossed</title>
+  <desc id="icon-desc">隐藏/IDOR图标：闭眼与斜线</desc>
+
+  <!-- 眼睛轮廓 -->
+  <path d="M2 12 C5 6 9 4 12 4 C15 4 19 6 22 12 C19 18 15 20 12 20 C9 20 5 18 2 12Z" fill="none" stroke="#818cf8" stroke-width="2" stroke-linejoin="round" />
+
+  <!-- 斜线（闭眼） -->
+  <path d="M4 4 L20 20" fill="none" stroke="#fb7185" stroke-width="2" stroke-linecap="round" />
+
+  <!-- 瞳孔（虚线表示不可见） -->
+  <circle cx="12" cy="12" r="3" fill="none" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="2 2" opacity="0.5" />
+</svg>

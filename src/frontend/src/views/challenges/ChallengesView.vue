@@ -40,41 +40,6 @@
       </button>
     </div>
 
-    <!-- Active Encoding Challenge Banner -->
-    <div
-      v-if="encodingStore.isActive"
-      class="bg-[var(--primary-subtle)] border border-[var(--primary)]/20 rounded-xl p-4 flex items-center justify-between"
-    >
-      <div class="flex items-center gap-3">
-        <i class="pi pi-lock text-[var(--primary)]"></i>
-        <div>
-          <p class="text-sm font-semibold text-[var(--primary)]">
-            编码挑战已激活: {{ encodingStore.activeChallenge?.name }}
-          </p>
-          <p class="text-xs text-[var(--text-secondary)]">
-            {{ encodingStore.activeChallenge?.description }} — 前往{{ encodingStore.activeChallenge?.targetPageLabel }}测试越权
-          </p>
-        </div>
-      </div>
-      <div class="flex gap-2">
-        <Button
-          :label="`前往${encodingStore.activeChallenge?.targetPageLabel}`"
-          icon="pi pi-arrow-right"
-          size="small"
-          :disabled="!encodingStore.activeChallenge?.targetPage"
-          @click="$router.push(encodingStore.activeChallenge?.targetPage || '/')"
-        />
-        <Button
-          label="关闭"
-          icon="pi pi-times"
-          text
-          size="small"
-          severity="secondary"
-          @click="encodingStore.deactivateChallenge()"
-        />
-      </div>
-    </div>
-
     <!-- Challenges Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       <div
@@ -82,8 +47,7 @@
         :key="ch.id"
         class="bg-[var(--bg-surface)] border rounded-xl overflow-hidden transition-all duration-200 hover:border-[var(--border-strong)] relative"
         :class="[
-          ch.completed ? 'border-[var(--success)]/30' : 'border-[var(--border-default)]',
-          isEncodingChallengeActive(ch.id) ? 'ring-2 ring-[var(--primary)]/30' : ''
+          ch.completed ? 'border-[var(--success)]/30' : 'border-[var(--border-default)]'
         ]"
       >
         <!-- Completed indicator -->
@@ -100,12 +64,6 @@
                 :value="ch.category"
                 class="text-[10px]"
                 :style="getCategoryStyle(ch.category)"
-              />
-              <Tag
-                v-if="ch.encoding_type"
-                :value="ch.encoding_type.toUpperCase()"
-                severity="info"
-                class="text-[10px]"
               />
             </div>
             <i v-if="ch.completed" class="pi pi-check-circle text-[var(--success)]"></i>
@@ -138,27 +96,6 @@
             </div>
           </div>
 
-          <!-- Encoded Endpoint -->
-          <div v-if="ch.encoded_endpoint" class="bg-[var(--info-subtle)] rounded-lg p-2.5 border border-[var(--info)]/10">
-            <div class="flex items-center gap-2 mb-1">
-              <i class="pi pi-lock text-[10px] text-[var(--info)]"></i>
-              <span class="text-[10px] text-[var(--info)] font-medium">编码端点</span>
-            </div>
-            <code class="text-[11px] text-[var(--text-secondary)] mono break-all">{{ ch.encoded_endpoint }}</code>
-          </div>
-
-          <!-- Encoding Challenge Actions -->
-          <div v-if="isEncodingChallenge(ch)" class="pt-1">
-            <Button
-              :label="isEncodingChallengeActive(ch.id) ? '已激活' : '激活挑战'"
-              :icon="isEncodingChallengeActive(ch.id) ? 'pi pi-check' : 'pi pi-play'"
-              :severity="isEncodingChallengeActive(ch.id) ? 'success' : 'primary'"
-              size="small"
-              class="w-full !text-xs"
-              @click="toggleEncodingChallenge(ch)"
-            />
-          </div>
-
           <!-- Actions -->
           <div class="flex gap-2 pt-1">
             <Button label="提示" icon="pi pi-lightbulb" text size="small" class="flex-1 !text-xs" @click="showHints(ch)" />
@@ -187,16 +124,6 @@
           </div>
           <p class="text-sm text-[var(--text-secondary)] pl-1">{{ hint }}</p>
         </div>
-        <div v-if="selectedChallenge.encoding_type" class="mt-3 bg-[var(--info-subtle)] rounded-lg p-3 border border-[var(--info)]/10">
-          <div class="flex items-center gap-2 mb-1">
-            <i class="pi pi-info-circle text-xs text-[var(--info)]"></i>
-            <span class="text-xs font-medium text-[var(--info)]">编码提示</span>
-          </div>
-          <p class="text-xs text-[var(--text-secondary)]">
-            点击"激活挑战"后，系统会自动将对应业务请求的参数使用 <code class="text-[11px] text-[var(--info)] mono">{{ selectedChallenge.encoding_type }}</code> 编码/加密。
-            然后前往目标页面正常操作即可触发越权漏洞。
-          </p>
-        </div>
       </div>
     </Dialog>
 
@@ -222,7 +149,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import * as api from '@/api'
 import type { Challenge, ChallengeDetail } from '@/types'
 import Tag from 'primevue/tag'
@@ -230,11 +156,8 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import { useToast } from 'primevue/usetoast'
 import PageHeader from '@/components/PageHeader.vue'
-import { useEncodingChallengeStore } from '@/stores/encodingChallenge'
 
 const toast = useToast()
-const router = useRouter()
-const encodingStore = useEncodingChallengeStore()
 const challenges = ref<Challenge[]>([])
 const selectedCategory = ref('all')
 const hintDialogVisible = ref(false)
@@ -247,7 +170,6 @@ const categories = [
   { label: '水平越权', value: '水平越权' },
   { label: '垂直越权', value: '垂直越权' },
   { label: '上下文越权', value: '上下文越权' },
-  { label: '编码加密', value: '编码' },
 ]
 
 const maxDifficulty = computed(() => {
@@ -271,8 +193,7 @@ onMounted(async () => {
 
 const filteredChallenges = computed(() => {
   if (selectedCategory.value === 'all') return challenges.value
-  return challenges.value.filter(ch => ch.category.includes(selectedCategory.value) ||
-    (selectedCategory.value === '编码' && ch.category.includes('加密')))
+  return challenges.value.filter(ch => ch.category.includes(selectedCategory.value))
 })
 
 const completedCount = computed(() => challenges.value.filter(ch => ch.completed).length)
@@ -291,38 +212,9 @@ function getCategoryStyle(cat: string) {
       color: 'var(--warning)',
     }
   }
-  if (cat.includes('编码')) {
-    return {
-      background: 'var(--primary-subtle)',
-      color: 'var(--primary)',
-    }
-  }
   return {
     background: 'var(--danger-subtle)',
     color: 'var(--danger)',
-  }
-}
-
-function isEncodingChallenge(ch: Challenge): boolean {
-  return ch.id.startsWith('E-') && !!ch.encoding_type
-}
-
-function isEncodingChallengeActive(challengeId: string): boolean {
-  return encodingStore.activeChallengeId === challengeId
-}
-
-function toggleEncodingChallenge(ch: Challenge) {
-  if (isEncodingChallengeActive(ch.id)) {
-    encodingStore.deactivateChallenge()
-    toast.add({ severity: 'info', summary: '已关闭', detail: '编码挑战模式已关闭', life: 2000 })
-  } else {
-    encodingStore.activateChallenge(ch.id as any)
-    toast.add({
-      severity: 'success',
-      summary: '挑战已激活',
-      detail: `${ch.title} 已激活，前往目标页面操作即可触发越权`,
-      life: 3000,
-    })
   }
 }
 

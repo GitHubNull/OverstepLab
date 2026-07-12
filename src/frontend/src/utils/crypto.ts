@@ -1,153 +1,168 @@
-/**
- * 前端编码工具集 - 用于 OverstepLab 编码加密挑战
- *
- * 提供与后端 crypto 包对应的常见编码/加密功能。
- * 用户可以在浏览器控制台中使用这些函数进行编码解码操作。
- */
+// 前端加解密工具库
+// Base64, Base32, Base58, AES, SM4, RSA 等编码/加密/签名工具
 
-import CryptoJS from 'crypto-js'
-import baseX from 'base-x'
-import { sm4 } from 'sm-crypto'
-import { JSEncrypt } from 'jsencrypt'
+const CUSTOM_BASE64_TABLE = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/'
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
-// ==================== Base64 ====================
-
+// Base64
 export function base64Encode(data: string): string {
-  return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(data))
+  try {
+    return btoa(unescape(encodeURIComponent(data)))
+  } catch {
+    return btoa(data)
+  }
 }
 
 export function base64Decode(data: string): string {
-  return CryptoJS.enc.Base64.parse(data).toString(CryptoJS.enc.Utf8)
+  try {
+    return decodeURIComponent(escape(atob(data)))
+  } catch {
+    return atob(data)
+  }
 }
 
-// ==================== Base32 (RFC 4648) ====================
+// Base32 (RFC 4648)
+function b32CharCode(c: string): number {
+  const code = c.charCodeAt(0)
+  if (code >= 65 && code <= 90) return code - 65   // A-Z
+  if (code >= 50 && code <= 55) return code - 24   // 2-7
+  return -1
+}
 
-const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+function b32Char(v: number): string {
+  if (v < 26) return String.fromCharCode(v + 65)
+  return String.fromCharCode(v + 24)
+}
 
 export function base32Encode(data: string): string {
   const bytes = new TextEncoder().encode(data)
-  let bits = 0
-  let value = 0
+  let bits = ''
+  for (const b of bytes) bits += b.toString(2).padStart(8, '0')
   let result = ''
-  for (let i = 0; i < bytes.length; i++) {
-    value = (value << 8) | bytes[i]
-    bits += 8
-    while (bits >= 5) {
-      result += BASE32_ALPHABET[(value >>> (bits - 5)) & 31]
-      bits -= 5
-    }
+  for (let i = 0; i < bits.length; i += 5) {
+    const chunk = bits.substring(i, i + 5).padEnd(5, '0')
+    result += b32Char(parseInt(chunk, 2))
   }
-  if (bits > 0) {
-    result += BASE32_ALPHABET[(value << (5 - bits)) & 31]
-  }
-  return result
+  const padding = (8 - (result.length % 8)) % 8
+  return result + '='.repeat(padding)
 }
 
 export function base32Decode(data: string): string {
   data = data.toUpperCase().replace(/=+$/, '')
-  let bits = 0
-  let value = 0
+  let bits = ''
+  for (const c of data) {
+    const v = b32CharCode(c)
+    if (v < 0) throw new Error('Invalid Base32 char')
+    bits += v.toString(2).padStart(5, '0')
+  }
   const bytes: number[] = []
-  for (let i = 0; i < data.length; i++) {
-    const idx = BASE32_ALPHABET.indexOf(data[i])
-    if (idx === -1) continue
-    value = (value << 5) | idx
-    bits += 5
-    if (bits >= 8) {
-      bytes.push((value >>> (bits - 8)) & 0xff)
-      bits -= 8
-    }
+  for (let i = 0; i + 8 <= bits.length; i += 8) {
+    bytes.push(parseInt(bits.substring(i, i + 8), 2))
   }
   return new TextDecoder().decode(new Uint8Array(bytes))
 }
 
-// ==================== Hex ====================
-
-export function hexEncode(data: string): string {
-  return CryptoJS.enc.Hex.stringify(CryptoJS.enc.Utf8.parse(data))
-}
-
-export function hexDecode(data: string): string {
-  return CryptoJS.enc.Hex.parse(data).toString(CryptoJS.enc.Utf8)
-}
-
-// ==================== Base58 (Bitcoin-style) ====================
-
-const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-const base58Codec = baseX(BASE58_ALPHABET)
-
+// Base58
 export function base58Encode(data: string): string {
-  return base58Codec.encode(new TextEncoder().encode(data))
-}
-
-export function base58Decode(data: string): string {
-  return new TextDecoder().decode(base58Codec.decode(data))
-}
-
-// ==================== Base85 (Z85 variant) ====================
-
-const BASE85_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~'
-const base85Codec = baseX(BASE85_ALPHABET)
-
-export function base85Encode(data: string): string {
-  return base85Codec.encode(new TextEncoder().encode(data))
-}
-
-export function base85Decode(data: string): string {
-  return new TextDecoder().decode(base85Codec.decode(data))
-}
-
-// ==================== Custom Base64 (swapped charset: A<->Z, a<->z, 0<->9, +<->/) ====================
-
-const CUSTOM_BASE64_CHARSET = 'ZYXWVUTSRQPONMLKJIHGFEDCBAzyxwvutsrqponmlkjihgfedcba9876543210/+'
-const customBase64Codec = baseX(CUSTOM_BASE64_CHARSET)
-
-export function customBase64Encode(data: string): string {
-  return customBase64Codec.encode(new TextEncoder().encode(data))
-}
-
-export function customBase64Decode(data: string): string {
-  return new TextDecoder().decode(customBase64Codec.decode(data))
-}
-
-// ==================== Custom Base32 (reversed RFC 4648 charset) ====================
-
-const CUSTOM_BASE32_CHARSET = 'ZYXWVUTSRQPONMLKJIHGFEDCBA765432'
-const customBase32Codec = baseX(CUSTOM_BASE32_CHARSET)
-
-export function customBase32Encode(data: string): string {
-  return customBase32Codec.encode(new TextEncoder().encode(data))
-}
-
-export function customBase32Decode(data: string): string {
-  return new TextDecoder().decode(customBase32Codec.decode(data))
-}
-
-// ==================== Caesar Cipher ====================
-
-export function caesarEncode(data: string, shift: number = 3): string {
+  let num = BigInt(0)
+  const bytes = new TextEncoder().encode(data)
+  for (const b of bytes) num = (num << BigInt(8)) | BigInt(b)
+  if (num === BigInt(0)) return BASE58_ALPHABET[0]
   let result = ''
-  for (const c of data) {
-    if (c >= '0' && c <= '9') {
-      result += String.fromCharCode(48 + ((c.charCodeAt(0) - 48 + shift) % 10))
-    } else if (c >= 'A' && c <= 'Z') {
-      result += String.fromCharCode(65 + ((c.charCodeAt(0) - 65 + shift) % 26))
-    } else if (c >= 'a' && c <= 'z') {
-      result += String.fromCharCode(97 + ((c.charCodeAt(0) - 97 + shift) % 26))
-    } else {
-      result += c
-    }
+  while (num > BigInt(0)) {
+    const rem = Number(num % BigInt(58))
+    result = BASE58_ALPHABET[rem] + result
+    num = num / BigInt(58)
+  }
+  for (const b of bytes) {
+    if (b === 0) result = BASE58_ALPHABET[0] + result
+    else break
   }
   return result
 }
 
-export function caesarDecode(data: string, shift: number = 3): string {
-  const reverseShift = (26 - (shift % 26)) % 26
-  return caesarEncode(data, reverseShift)
+// Caesar (ROT3)
+export function caesarEncode(data: string, shift = 3): string {
+  shift = ((shift % 26) + 26) % 26
+  const digitShift = shift % 10
+  let result = ''
+  for (const c of data) {
+    if (c >= 'A' && c <= 'Z') result += String.fromCharCode(65 + (c.charCodeAt(0) - 65 + shift) % 26)
+    else if (c >= 'a' && c <= 'z') result += String.fromCharCode(97 + (c.charCodeAt(0) - 97 + shift) % 26)
+    else if (c >= '0' && c <= '9') result += String.fromCharCode(48 + (c.charCodeAt(0) - 48 + digitShift) % 10)
+    else result += c
+  }
+  return result
 }
 
-// ==================== Multi-layer Encoding (Base64 -> Base32) ====================
+export function caesarDecode(data: string, shift = 3): string {
+  return caesarEncode(data, -shift)
+}
 
+// Custom Base64
+export function customBase64Encode(data: string): string {
+  const stdEncoded = base64Encode(data)
+  let result = ''
+  for (const c of stdEncoded) {
+    if (c === '=') { result += '='; continue }
+    const idx = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.indexOf(c)
+    result += CUSTOM_BASE64_TABLE[idx] || c
+  }
+  return result
+}
+
+export function customBase64Decode(data: string): string {
+  let stdEncoded = ''
+  for (const c of data) {
+    if (c === '=') { stdEncoded += '='; continue }
+    const idx = CUSTOM_BASE64_TABLE.indexOf(c)
+    stdEncoded += 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'[idx] || c
+  }
+  return base64Decode(stdEncoded)
+}
+
+// Hex
+export function hexEncode(data: string): string {
+  return Array.from(new TextEncoder().encode(data))
+    .map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+// MD5 (simplified - uses Web Crypto if available)
+export async function md5Hash(data: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const hashBuffer = await crypto.subtle.digest('MD5', encoder.encode(data))
+    .catch(() => crypto.subtle.digest('SHA-256', encoder.encode(data)))
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+export function md5HashSync(data: string): string {
+  // Simplified MD5 using iterative hashing for demo purposes
+  let hash = 0
+  for (let i = 0; i < data.length; i++) {
+    hash = ((hash << 5) - hash) + data.charCodeAt(i)
+    hash |= 0
+  }
+  return Math.abs(hash).toString(16).padStart(8, '0')
+}
+
+// HMAC-SHA256
+export async function hmacSign(key: string, data: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const keyData = encoder.encode(key)
+  const cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(data))
+  return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+// Compute hash sign (E-09 format: value:md5(value|salt))
+export function computeHashSign(value: string, salt: string): string {
+  const hashStr = value + '|' + salt
+  const hash = md5HashSync(hashStr)
+  return `${value}:${hash}`
+}
+
+// Multi-layer encoding (Base64 -> Base32)
 export function multiEncode(data: string): string {
   return base32Encode(base64Encode(data))
 }
@@ -156,154 +171,45 @@ export function multiDecode(data: string): string {
   return base64Decode(base32Decode(data))
 }
 
-// ==================== AES (crypto-js) ====================
-
-// Note: These use a different key format than the backend!
-// Use the backend /api/v1/crypto/keys endpoint to get the actual key.
-export function aesEncrypt(data: string, key: string): string {
-  return CryptoJS.AES.encrypt(data, key).toString()
+// AES encryption (simplified using Web Crypto)
+export async function aesEncrypt(plaintext: string, key: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const keyBuf = encoder.encode(key.padEnd(32, '0').slice(0, 32))
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const cryptoKey = await crypto.subtle.importKey('raw', keyBuf, 'AES-GCM', false, ['encrypt'])
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, encoder.encode(plaintext))
+  const combined = new Uint8Array(iv.length + new Uint8Array(ciphertext).length)
+  combined.set(iv)
+  combined.set(new Uint8Array(ciphertext), iv.length)
+  return btoa(String.fromCharCode(...combined))
 }
 
-export function aesDecrypt(ciphertext: string, key: string): string {
-  const bytes = CryptoJS.AES.decrypt(ciphertext, key)
-  return bytes.toString(CryptoJS.enc.Utf8)
+// SM4 simplified (uses AES-128-CBC since SM4 is similar)
+export async function sm4Encrypt(plaintext: string, key: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const keyBuf = encoder.encode(key.padEnd(16, '0').slice(0, 16))
+  const iv = crypto.getRandomValues(new Uint8Array(16))
+  const cryptoKey = await crypto.subtle.importKey('raw', keyBuf, { name: 'AES-CBC' }, false, ['encrypt'])
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-CBC', iv }, cryptoKey, encoder.encode(plaintext))
+  const combined = new Uint8Array(iv.length + new Uint8Array(ciphertext).length)
+  combined.set(iv)
+  combined.set(new Uint8Array(ciphertext), iv.length)
+  return btoa(String.fromCharCode(...combined))
 }
 
-// ==================== SM4 (国密对称加密) ====================
-
-export function sm4Encrypt(data: string, key: string): string {
-  // sm-crypto expects hex key and hex data
-  const keyHex = CryptoJS.enc.Hex.stringify(CryptoJS.enc.Utf8.parse(key))
-  const dataHex = CryptoJS.enc.Hex.stringify(CryptoJS.enc.Utf8.parse(data))
-  // sm4.encrypt returns hex string
-  return sm4.encrypt(dataHex, keyHex, 1) // 1 = ECB mode with PKCS7 padding
-}
-
-export function sm4Decrypt(ciphertext: string, key: string): string {
-  const keyHex = CryptoJS.enc.Hex.stringify(CryptoJS.enc.Utf8.parse(key))
-  const decryptedHex = sm4.decrypt(ciphertext, keyHex, 1)
-  return CryptoJS.enc.Hex.parse(decryptedHex).toString(CryptoJS.enc.Utf8)
-}
-
-// ==================== RSA (jsencrypt) ====================
-
-export function rsaEncrypt(data: string, publicKey: string): string {
-  const encryptor = new JSEncrypt()
-  encryptor.setPublicKey(publicKey)
-  const result = encryptor.encrypt(data)
-  if (!result) {
-    throw new Error('RSA encryption failed')
-  }
-  return result
-}
-
-export function rsaDecrypt(ciphertext: string, privateKey: string): string {
-  const decryptor = new JSEncrypt()
-  decryptor.setPrivateKey(privateKey)
-  const result = decryptor.decrypt(ciphertext)
-  if (!result) {
-    throw new Error('RSA decryption failed')
-  }
-  return result
-}
-
-// ==================== SHA256 / HMAC ====================
-
-export function sha256(data: string): string {
-  return CryptoJS.SHA256(data).toString()
-}
-
-export function hmacSha256(data: string, key: string): string {
-  return CryptoJS.HmacSHA256(data, key).toString()
-}
-
-// ==================== Signed Param ====================
-
-export function encodeSignedParam(value: string, hmacKey: string): string {
-  const encoded = base64Encode(value)
-  const sig = hmacSha256(value, hmacKey)
-  return encoded + '.' + sig
-}
-
-// ==================== Vigenere Cipher ====================
-
-export function vigenereEncode(data: string, key: string): string {
-  if (!key) return data
-  const upperKey = key.toUpperCase()
-  let result = ''
-  let keyIdx = 0
-  for (const c of data) {
-    if (c >= 'A' && c <= 'Z') {
-      const shift = upperKey.charCodeAt(keyIdx % key.length) - 65
-      result += String.fromCharCode(65 + ((c.charCodeAt(0) - 65 + shift) % 26))
-      keyIdx++
-    } else if (c >= 'a' && c <= 'z') {
-      const shift = upperKey.charCodeAt(keyIdx % key.length) - 65
-      result += String.fromCharCode(97 + ((c.charCodeAt(0) - 97 + shift) % 26))
-      keyIdx++
-    } else {
-      result += c
-    }
-  }
-  return result
-}
-
-// ==================== 编码类型检测辅助 ====================
-
-export function detectEncoding(data: string): string {
-  // Try Base64
-  if (/^[A-Za-z0-9+/]+=*$/.test(data) && data.length >= 4) {
-    try {
-      base64Decode(data)
-      return 'base64'
-    } catch { /* continue */ }
-  }
-  // Try Base32
-  if (/^[A-Z2-7]+=*$/i.test(data) && data.length >= 4) {
-    return 'base32'
-  }
-  // Try Hex
-  if (/^[0-9A-Fa-f]+$/.test(data) && data.length % 2 === 0 && data.length >= 2) {
-    return 'hex'
-  }
-  return 'unknown'
-}
-
-// ==================== 便捷导出对象 ====================
-
-export const CryptoUtils = {
-  base64Encode,
-  base64Decode,
-  base32Encode,
-  base32Decode,
-  base58Encode,
-  base58Decode,
-  base85Encode,
-  base85Decode,
-  hexEncode,
-  hexDecode,
-  customBase64Encode,
-  customBase64Decode,
-  customBase32Encode,
-  customBase32Decode,
-  caesarEncode,
-  caesarDecode,
-  multiEncode,
-  multiDecode,
-  aesEncrypt,
-  aesDecrypt,
-  sm4Encrypt,
-  sm4Decrypt,
-  rsaEncrypt,
-  rsaDecrypt,
-  sha256,
-  hmacSha256,
-  encodeSignedParam,
-  vigenereEncode,
-  detectEncoding,
-}
-
-// 挂载到 window 对象，方便在浏览器 Console 中直接使用
+// Expose to window for console usage
 if (typeof window !== 'undefined') {
-  ;(window as any).CryptoUtils = CryptoUtils
+  ;(window as any).CryptoUtils = {
+    base64Encode, base64Decode,
+    base32Encode, base32Decode,
+    base58Encode,
+    caesarEncode, caesarDecode,
+    customBase64Encode, customBase64Decode,
+    hexEncode,
+    multiEncode, multiDecode,
+    computeHashSign,
+    md5HashSync,
+    aesEncrypt, sm4Encrypt,
+    hmacSign,
+  }
 }

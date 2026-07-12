@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="logo-title logo-desc">
+  <title id="logo-title">OverstepLab Logo</title>
+  <desc id="logo-desc">OverstepLab 越权测试靶场品牌图标：三层六边形权限层级与突破光带的抽象组合</desc>
+
+  <defs>
+    <!-- 主渐变：Indigo 到 Violet -->
+    <linearGradient id="grad-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#818cf8;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- 突破光带渐变 -->
+    <linearGradient id="grad-breakthrough" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#818cf8;stop-opacity:0.9" />
+      <stop offset="50%" style="stop-color:#a5b4fc;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c7d2fe;stop-opacity:0.6" />
+    </linearGradient>
+
+    <!-- 发光滤镜 -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- 内发光 -->
+    <filter id="inner-glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- 背景深色 -->
+    <rect id="bg-dark" width="512" height="512" fill="#0a0a0a" rx="80" />
+
+    <!-- 六边形路径模板 -->
+    <path id="hex-outer" d="M256 48 L448 160 L448 352 L256 464 L64 352 L64 160 Z" />
+    <path id="hex-mid" d="M256 96 L400 184 L400 328 L256 416 L112 328 L112 184 Z" />
+    <path id="hex-inner" d="M256 144 L352 200 L352 312 L256 368 L160 312 L160 200 Z" />
+  </defs>
+
+  <!-- 背景 -->
+  <use href="#bg-dark" />
+
+  <!-- 外六边形轮廓（盾牌形态）-->
+  <use href="#hex-outer" fill="none" stroke="url(#grad-primary)" stroke-width="8" stroke-linejoin="round" filter="url(#glow)" />
+
+  <!-- 中间六边形 -->
+  <use href="#hex-mid" fill="none" stroke="#4f46e5" stroke-width="4" stroke-linejoin="round" opacity="0.6" />
+
+  <!-- 内六边形 -->
+  <use href="#hex-inner" fill="none" stroke="#6366f1" stroke-width="3" stroke-linejoin="round" opacity="0.4" />
+
+  <!-- 突破光带（越权概念）——从中心向右上方延伸 -->
+  <path d="M180 340 L340 180" stroke="url(#grad-breakthrough)" stroke-width="14" stroke-linecap="round" filter="url(#glow)" opacity="0.95" />
+  <path d="M180 340 L340 180" stroke="#c7d2fe" stroke-width="4" stroke-linecap="round" opacity="0.8" />
+
+  <!-- 中心锁形抽象（安全与突破的矛盾）-->
+  <g transform="translate(256, 260)">
+    <!-- 锁体 -->
+    <rect x="-28" y="-8" width="56" height="44" rx="8" fill="none" stroke="#818cf8" stroke-width="5" />
+    <!-- 锁梁（断开表示突破）-->
+    <path d="M-20 -8 L-20 -28 A20 20 0 0 1 20 -28 L20 -8" fill="none" stroke="#818cf8" stroke-width="5" stroke-linecap="round" />
+    <!-- 锁孔 -->
+    <circle cx="0" cy="14" r="6" fill="#a5b4fc" />
+    <rect x="-3" y="14" width="6" height="12" rx="2" fill="#a5b4fc" />
+  </g>
+
+  <!-- 装饰点：层级节点 -->
+  <circle cx="256" cy="48" r="5" fill="#818cf8" opacity="0.8" />
+  <circle cx="448" cy="160" r="4" fill="#6366f1" opacity="0.6" />
+  <circle cx="64" cy="352" r="4" fill="#6366f1" opacity="0.6" />
+  <circle cx="256" cy="464" r="5" fill="#818cf8" opacity="0.8" />
+
+  <!-- 底部小字 -->
+  <text x="256" y="490" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="500" fill="#6366f1" opacity="0.7" letter-spacing="3">OVERSTEP</text>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-labelledby="empty-title empty-desc">
+  <title id="empty-title">No Data Empty State</title>
+  <desc id="empty-desc">无数据状态插画：空六边形网格</desc>
+
+  <defs>
+    <linearGradient id="grad-empty" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#818cf8;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="200" height="200" fill="#0c0c0c" rx="20" />
+
+  <!-- 大六边形轮廓（虚线表示空） -->
+  <path d="M100 40 L170 80 L170 140 L100 180 L30 140 L30 80 Z" fill="none" stroke="url(#grad-empty)" stroke-width="2" stroke-dasharray="8 4" stroke-linejoin="round" />
+
+  <!-- 内六边形 -->
+  <path d="M100 65 L145 90 L145 130 L100 155 L55 130 L55 90 Z" fill="none" stroke="#4f46e5" stroke-width="1.5" stroke-dasharray="4 4" stroke-linejoin="round" opacity="0.3" />
+
+  <!-- 中心点 -->
+  <circle cx="100" cy="110" r="4" fill="#6366f1" opacity="0.5" />
+
+  <!-- 文字 -->
+  <text x="100" y="195" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="500" fill="#4b5563">NO DATA</text>
+</svg>

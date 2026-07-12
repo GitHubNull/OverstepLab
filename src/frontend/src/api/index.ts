@@ -116,9 +116,6 @@ export const adminUpdateAnnouncement = (id: number, data: { title: string; conte
 export const adminDeleteAnnouncement = (id: number) =>
   apiClient.delete<ApiResponse>('/admin/announcements', { data: { id } })
 
-// Crypto / Encoding Tools
-export { cryptoEncode, cryptoDecode, getCryptoKeys } from './crypto'
-
 export { rawClient }
 
 // System Config

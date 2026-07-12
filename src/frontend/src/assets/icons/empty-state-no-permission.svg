@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-labelledby="empty-title empty-desc">
+  <title id="empty-title">No Permission Empty State</title>
+  <desc id="empty-desc">权限不足状态插画：锁定的六边形</desc>
+
+  <defs>
+    <linearGradient id="grad-lock" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ef4444;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#fb7185;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="200" height="200" fill="#0c0c0c" rx="20" />
+
+  <!-- 六边形轮廓 -->
+  <path d="M100 40 L170 80 L170 140 L100 180 L30 140 L30 80 Z" fill="none" stroke="url(#grad-lock)" stroke-width="2" stroke-linejoin="round" />
+
+  <!-- 中心锁 -->
+  <g transform="translate(100, 110)">
+    <rect x="-16" y="-6" width="32" height="24" rx="4" fill="none" stroke="#fb7185" stroke-width="2" />
+    <path d="M-10 -6 L-10 -14 A10 10 0 0 1 10 -14 L10 -6" fill="none" stroke="#fb7185" stroke-width="2" stroke-linecap="round" />
+    <circle cx="0" cy="6" r="3" fill="#fb7185" />
+    <rect x="-1.5" y="6" width="3" height="6" rx="1" fill="#fb7185" />
+  </g>
+
+  <!-- 叉号 -->
+  <path d="M140 50 L160 70 M160 50 L140 70" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" />
+
+  <text x="100" y="195" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="500" fill="#7f1d1d">ACCESS DENIED</text>
+</svg>

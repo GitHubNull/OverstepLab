@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-labelledby="icon-title icon-desc">
+  <title id="icon-title">Shield Check</title>
+  <desc id="icon-desc">安全模式指示图标：盾牌与对勾</desc>
+
+  <!-- 盾牌轮廓 -->
+  <path d="M12 2 L4 6 L4 12 C4 17.5 7.5 21.5 12 22 C16.5 21.5 20 17.5 20 12 L20 6 L12 2Z" fill="none" stroke="#34d399" stroke-width="2" stroke-linejoin="round" />
+
+  <!-- 对勾 -->
+  <path d="M9 12 L11.5 14.5 L16 10" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

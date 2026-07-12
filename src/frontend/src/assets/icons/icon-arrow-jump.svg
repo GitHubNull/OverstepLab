@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-labelledby="icon-title icon-desc">
+  <title id="icon-title">Arrow Jump</title>
+  <desc id="icon-desc">越权动作图标：跳跃箭头，表示权限跨越</desc>
+
+  <!-- 起始层级线 -->
+  <line x1="3" y1="18" x2="10" y2="18" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" />
+
+  <!-- 目标层级线 -->
+  <line x1="14" y1="6" x2="21" y2="6" stroke="#818cf8" stroke-width="2" stroke-linecap="round" />
+
+  <!-- 跳跃箭头 -->
+  <path d="M8 18 L8 12 L16 12 L16 6" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- 箭头头部 -->
+  <path d="M14 8 L16 6 L18 8" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- 层级标记点 -->
+  <circle cx="3" cy="18" r="1.5" fill="#4f46e5" />
+  <circle cx="21" cy="6" r="1.5" fill="#818cf8" />
+</svg>

@@ -42,7 +42,6 @@ func Setup(cfg *config.Config) *gin.Engine {
 	challengeHandler := handler.NewChallengeHandler(cfg.DBPath)
 	announceHandler := handler.NewAnnouncementHandler(announceSvc)
 	configHandler := handler.NewConfigHandler()
-	encodedHandler := handler.NewEncodedHandler(vpsSvc, userSvc, orderSvc, ticketSvc, apiKeySvc, companySvc)
 
 	// Auth routes (public)
 	auth := r.Group("/api/v1/auth")
@@ -63,8 +62,8 @@ func Setup(cfg *config.Config) *gin.Engine {
 	// Authenticated routes
 	authGroup := api.Group("")
 	authGroup.Use(middleware.AuthMiddleware(cfg.JWTSecret))
-	authGroup.Use(middleware.AuditMiddleware())
 	authGroup.Use(middleware.EncodingMiddleware())
+	authGroup.Use(middleware.AuditMiddleware())
 	{
 		authGroup.POST("/logout", authHandler.Logout)
 
@@ -168,29 +167,6 @@ func Setup(cfg *config.Config) *gin.Engine {
 			challenges.GET("/detail", challengeHandler.Detail)
 			challenges.GET("/hints", challengeHandler.GetHint)
 			challenges.POST("/complete", challengeHandler.MarkComplete)
-		}
-
-		// Encoded challenge routes (encoding/encryption wrapper endpoints)
-		encoded := authGroup.Group("/encoded")
-		{
-			encoded.GET("/vps", encodedHandler.GetVPSByEncodedID)
-			encoded.POST("/vps/start", encodedHandler.StartVPSEncoded)
-			encoded.POST("/vps/stop", encodedHandler.StopVPSEncoded)
-			encoded.POST("/vps/reinstall", encodedHandler.ReinstallVPSEncoded)
-			encoded.GET("/users", encodedHandler.GetUserByEncodedID)
-			encoded.GET("/orders", encodedHandler.GetOrderByEncodedID)
-			encoded.GET("/tickets", encodedHandler.GetTicketByEncodedID)
-			encoded.DELETE("/apikeys", encodedHandler.DeleteAPIKeyEncoded)
-			encoded.POST("/company/members", encodedHandler.AddMemberEncoded)
-			encoded.PUT("/company/members/role", encodedHandler.ChangeRoleEncoded)
-		}
-
-		// Crypto utility routes (for encoding/decoding practice)
-		cryptoGroup := authGroup.Group("/crypto")
-		{
-			cryptoGroup.POST("/encode", encodedHandler.EncodeValue)
-			cryptoGroup.POST("/decode", encodedHandler.DecodeValue)
-			cryptoGroup.GET("/keys", encodedHandler.GetCryptoKeys)
 		}
 
 		authGroup.GET("/security-mode", challengeHandler.GetSecurityMode)

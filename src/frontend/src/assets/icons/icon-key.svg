@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-labelledby="icon-title icon-desc">
+  <title id="icon-title">Key</title>
+  <desc id="icon-desc">API Key管理图标：钥匙符号</desc>
+
+  <!-- 钥匙环 -->
+  <circle cx="8" cy="8" r="4" fill="none" stroke="#818cf8" stroke-width="2" />
+
+  <!-- 钥匙柄 -->
+  <line x1="8" y1="12" x2="8" y2="18" stroke="#818cf8" stroke-width="2" stroke-linecap="round" />
+
+  <!-- 钥匙齿 -->
+  <line x1="8" y1="18" x2="14" y2="18" stroke="#818cf8" stroke-width="2" stroke-linecap="round" />
+  <line x1="11" y1="18" x2="11" y2="16" stroke="#818cf8" stroke-width="2" stroke-linecap="round" />
+  <line x1="14" y1="18" x2="14" y2="17" stroke="#818cf8" stroke-width="2" stroke-linecap="round" />
+</svg>

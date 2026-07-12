@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-labelledby="favicon-title favicon-desc">
+  <title id="favicon-title">OverstepLab Favicon 32</title>
+  <desc id="favicon-desc">OverstepLab 浏览器标签页图标 32x32</desc>
+
+  <defs>
+    <linearGradient id="grad-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#818cf8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="32" height="32" fill="#0a0a0a" rx="6" />
+  <path d="M16 4 L28 11 L28 21 L16 28 L4 21 L4 11 Z" fill="none" stroke="url(#grad-primary)" stroke-width="2" stroke-linejoin="round" />
+  <path d="M16 9 L24 14 L24 19 L16 24 L8 19 L8 14 Z" fill="none" stroke="#6366f1" stroke-width="1.2" stroke-linejoin="round" opacity="0.6" />
+  <path d="M10 22 L22 10" stroke="#a5b4fc" stroke-width="2.5" stroke-linecap="round" />
+  <circle cx="16" cy="4" r="1.5" fill="#818cf8" />
+  <circle cx="16" cy="28" r="1.5" fill="#818cf8" />
+</svg>

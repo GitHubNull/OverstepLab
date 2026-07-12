@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 120" width="600" height="120" role="img" aria-labelledby="logo-title logo-desc">
+  <title id="logo-title">OverstepLab Wordmark</title>
+  <desc id="logo-desc">OverstepLab 纯文字标识</desc>
+
+  <text x="0" y="85" font-family="'Inter', -apple-system, BlinkMacSystemFont, sans-serif" font-size="72" font-weight="700" fill="#f0f0f0" letter-spacing="-1">Overstep<tspan fill="#818cf8">Lab</tspan></text>
+  <text x="2" y="110" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="500" fill="#6366f1" letter-spacing="3">越权测试靶场</text>
+</svg>

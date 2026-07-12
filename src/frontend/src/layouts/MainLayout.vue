@@ -165,17 +165,6 @@
         </div>
 
         <div class="flex items-center gap-1.5 flex-shrink-0">
-          <!-- Active Encoding Challenge Indicator -->
-          <div
-            v-if="encodingStore.isActive"
-            class="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[var(--primary-subtle)] border border-[var(--primary)]/20 cursor-pointer"
-            @click="$router.push('/challenges')"
-          >
-            <i class="pi pi-lock text-[10px] text-[var(--primary)]"></i>
-            <span class="text-[11px] font-medium text-[var(--primary)]">
-              {{ encodingStore.activeChallenge?.id }}
-            </span>
-          </div>
 
           <ThemeToggle />
 
@@ -250,7 +239,6 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { useEncodingChallengeStore } from '@/stores/encodingChallenge'
 import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
 import Badge from 'primevue/badge'
@@ -261,7 +249,6 @@ import ThemeToggle from '@/components/ThemeToggle.vue'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
-const encodingStore = useEncodingChallengeStore()
 const toast = useToast()
 
 const sidebarOpen = ref(false)
@@ -305,7 +292,6 @@ const breadcrumbs = computed(() => {
       ApiKeys: 'API Key 管理',
       AuditLogs: '审计日志',
       Challenges: '漏洞挑战',
-      CryptoTools: '编码工具',
     }
     if (labels[name]) {
       crumbs.push({ label: labels[name], path: route.path })
@@ -373,8 +359,7 @@ const menuGroups = computed<MenuGroup[]>(() => {
   groups.push({
     label: undefined,
     items: [
-      { label: '编码工具', icon: 'pi pi-wrench', to: '/tools' },
-      { label: '漏洞挑战', icon: 'pi pi-flag', to: '/challenges', badge: '21' },
+      { label: '漏洞挑战', icon: 'pi pi-flag', to: '/challenges', badge: '13' },
     ]
   })
 

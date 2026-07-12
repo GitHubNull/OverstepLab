@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-labelledby="bg-title bg-desc">
+  <title id="bg-title">Dark Grid Background Pattern</title>
+  <desc id="bg-desc">深色网格背景图案，可平铺使用，用于文档代码块背景</desc>
+
+  <defs>
+    <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(99,102,241,0.04)" stroke-width="0.5" />
+    </pattern>
+  </defs>
+
+  <rect width="200" height="200" fill="#0c0c0c" />
+  <rect width="200" height="200" fill="url(#grid-pattern)" />
+
+  <!-- 微弱径向光晕 -->
+  <circle cx="100" cy="100" r="80" fill="radial-gradient(circle, rgba(79,70,229,0.03) 0%, transparent 70%)" />
+</svg>
