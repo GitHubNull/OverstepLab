@@ -30,7 +30,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/vps/VpsListView.vue'),
       },
       {
-        path: 'vps/:id',
+        path: 'vps/detail',
         name: 'VpsDetail',
         component: () => import('@/views/vps/VpsDetailView.vue'),
       },
@@ -60,7 +60,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/tickets/TicketListView.vue'),
       },
       {
-        path: 'tickets/:id',
+        path: 'tickets/detail',
         name: 'TicketDetail',
         component: () => import('@/views/tickets/TicketDetailView.vue'),
       },
@@ -73,6 +73,11 @@ const routes: RouteRecordRaw[] = [
         path: 'audit',
         name: 'AuditLogs',
         component: () => import('@/views/audit/AuditLogsView.vue'),
+      },
+      {
+        path: 'tools',
+        name: 'CryptoTools',
+        component: () => import('@/views/tools/CryptoToolsView.vue'),
       },
       {
         path: 'challenges',

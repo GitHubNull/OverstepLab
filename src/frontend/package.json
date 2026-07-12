@@ -1,6 +1,6 @@
 {
   "name": "oversteplab-frontend",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,16 +12,21 @@
   "dependencies": {
     "@primevue/themes": "^4.5.4",
     "axios": "^1.7.0",
+    "base-x": "^5.0.1",
+    "crypto-js": "^4.2.0",
+    "jsencrypt": "^3.5.4",
     "pinia": "^2.2.0",
     "primeflex": "^3.3.1",
     "primeicons": "^7.0.0",
     "primevue": "^4.2.0",
+    "sm-crypto": "^0.4.0",
     "vue": "^3.4.0",
     "vue-router": "^4.4.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.4",
     "@tailwindcss/vite": "^4.2.4",
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^25.6.0",
     "@vitejs/plugin-vue": "^5.1.0",
     "postcss": "^8.5.10",

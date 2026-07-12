@@ -49,7 +49,7 @@
       <StatCard color="#3b82f6" icon="pi pi-server" :value="vpsStore.vpsList.length" label="VPS 总数" />
       <StatCard color="#10b981" icon="pi pi-check-circle" :value="runningCount" label="运行中" />
       <StatCard color="#f43f5e" icon="pi pi-times-circle" :value="stoppedCount" label="已停止" />
-      <StatCard color="#8b5cf6" icon="pi pi-flag" :value="`${completedChallenges}/13`" label="挑战完成" />
+      <StatCard color="#8b5cf6" icon="pi pi-flag" :value="`${completedChallenges}/${challenges.length}`" label="挑战完成" />
     </div>
 
     <!-- VPS List & Quick Actions -->
@@ -114,7 +114,7 @@
                   rounded
                   size="small"
                   class="text-[var(--text-tertiary)]"
-                  @click="$router.push(`/vps/${data.id}`)"
+                  @click="$router.push({ path: '/vps/detail', query: { vpsId: data.id } })"
                 />
               </template>
             </Column>

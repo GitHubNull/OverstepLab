@@ -69,7 +69,7 @@
 
           <!-- Actions -->
           <div class="flex gap-2 mt-4 pt-3 border-t border-[var(--border-default)]">
-            <Button label="详情" icon="pi pi-eye" text size="small" class="flex-1" @click="$router.push(`/vps/${vps.id}`)" />
+            <Button label="详情" icon="pi pi-eye" text size="small" class="flex-1" @click="$router.push({ path: '/vps/detail', query: { vpsId: vps.id } })" />
             <Button
               v-if="vps.status === 'stopped'"
               label="启动" icon="pi pi-play" severity="success" size="small" class="flex-1"

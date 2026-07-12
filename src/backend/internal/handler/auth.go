@@ -138,7 +138,7 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 
 func (h *UserHandler) GetUserByID(c *gin.Context) {
 	currentUser := middleware.GetCurrentUser(c)
-	id := c.Param("id")
+	id := middleware.DecodeQueryParam(c, "id")
 	var uid uint
 	if _, err := fmt.Sscanf(id, "%d", &uid); err != nil {
 		common.BadRequest(c, "Invalid user ID")

@@ -118,7 +118,7 @@ const submitting = ref(false)
 
 onMounted(async () => {
   try {
-    const response = await api.getTicketDetail(Number(route.params.id))
+    const response = await api.getTicketDetail(Number(route.query.ticketId))
     ticket.value = response.data.data!.ticket
     replies.value = response.data.data!.replies
   } catch (e: any) {
@@ -148,10 +148,10 @@ async function submitReply() {
   }
   submitting.value = true
   try {
-    await api.replyTicket(Number(route.params.id), replyContent.value)
+    await api.replyTicket(Number(route.query.ticketId), replyContent.value)
     toast.add({ severity: 'success', summary: '成功', detail: '回复已提交' })
     replyContent.value = ''
-    const response = await api.getTicketDetail(Number(route.params.id))
+    const response = await api.getTicketDetail(Number(route.query.ticketId))
     ticket.value = response.data.data!.ticket
     replies.value = response.data.data!.replies
   } catch (e: any) {
@@ -168,9 +168,9 @@ function handleClose() {
     icon: 'pi pi-exclamation-triangle',
     accept: async () => {
       try {
-        await api.closeTicket(Number(route.params.id))
+        await api.closeTicket(Number(route.query.ticketId))
         toast.add({ severity: 'success', summary: '成功', detail: '工单已关闭' })
-        const response = await api.getTicketDetail(Number(route.params.id))
+        const response = await api.getTicketDetail(Number(route.query.ticketId))
         ticket.value = response.data.data!.ticket
         replies.value = response.data.data!.replies
       } catch (e: any) {

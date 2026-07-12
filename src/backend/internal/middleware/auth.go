@@ -3,6 +3,7 @@ package middleware
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"strconv"
 	"strings"
 	"time"
 
@@ -207,4 +208,60 @@ func OptionalAuth(jwtSecret string) gin.HandlerFunc {
 		c.Set(CtxCurrentUser, user)
 		c.Next()
 	}
+}
+
+// ---- Encoding Challenge Helpers ----
+// NOTE: Since EncodingMiddleware now handles all decoding transparently,
+// these helpers simply return raw values from the request. Decoding is
+// already done by the middleware before the handler runs.
+
+// GetEncodingType extracts the encoding type from the X-Encoding-Type header.
+func GetEncodingType(c *gin.Context) string {
+	encType := c.GetHeader("X-Encoding-Type")
+	if encType == "" {
+		return "none"
+	}
+	return encType
+}
+
+// DecodeQueryParam returns the raw query parameter value.
+// Decoding is handled by EncodingMiddleware, so this just reads from the request.
+func DecodeQueryParam(c *gin.Context, key string) string {
+	return c.Query(key)
+}
+
+// DecodeBodyField is a no-op in the global encoding architecture.
+// Body fields are already decoded by EncodingMiddleware.
+func DecodeBodyField(data map[string]interface{}, key string, encType string) {
+	// No-op: EncodingMiddleware handles all decoding
+}
+
+// DecodeUintParam returns the query parameter parsed as uint.
+// Decoding is handled by EncodingMiddleware.
+func DecodeUintParam(c *gin.Context, key string) uint {
+	raw := c.Query(key)
+	if raw == "" {
+		return 0
+	}
+	id, _ := strconv.ParseUint(raw, 10, 64)
+	return uint(id)
+}
+
+// DecodeUintBodyField returns a body field parsed as uint.
+// Decoding is handled by EncodingMiddleware.
+func DecodeUintBodyField(data map[string]interface{}, key string, encType string) uint {
+	if val, ok := data[key]; ok {
+		switch v := val.(type) {
+		case float64:
+			return uint(v)
+		case string:
+			id, _ := strconv.ParseUint(v, 10, 64)
+			return uint(id)
+		case int:
+			return uint(v)
+		case uint:
+			return v
+		}
+	}
+	return 0
 }

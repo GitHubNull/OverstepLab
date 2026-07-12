@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/oversteplab/oversteplab/internal/common"
 	"github.com/oversteplab/oversteplab/internal/middleware"
@@ -52,13 +50,12 @@ func (h *CompanyHandler) AddMember(c *gin.Context) {
 
 func (h *CompanyHandler) UpdateMember(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	var input service.UpdateMemberInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		common.BadRequest(c, "Invalid request")
 		return
 	}
-	if err := h.companyService.UpdateMember(user, uint(id), &input); err != nil {
+	if err := h.companyService.UpdateMember(user, input.ID, &input); err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
 		} else if err == service.ErrMemberNotFound {
@@ -73,8 +70,14 @@ func (h *CompanyHandler) UpdateMember(c *gin.Context) {
 
 func (h *CompanyHandler) DeleteMember(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := h.companyService.DeleteMember(user, uint(id)); err != nil {
+	var input struct {
+		ID uint `json:"id"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+	if err := h.companyService.DeleteMember(user, input.ID); err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
 		} else if err == service.ErrMemberNotFound {
@@ -89,15 +92,15 @@ func (h *CompanyHandler) DeleteMember(c *gin.Context) {
 
 func (h *CompanyHandler) ChangeRole(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	var input struct {
+		ID   uint   `json:"id"`
 		Role string `json:"role"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil || input.Role == "" {
 		common.BadRequest(c, "Invalid request")
 		return
 	}
-	if err := h.companyService.ChangeRole(user, uint(id), input.Role); err != nil {
+	if err := h.companyService.ChangeRole(user, input.ID, input.Role); err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
 		} else if err == service.ErrMemberNotFound {

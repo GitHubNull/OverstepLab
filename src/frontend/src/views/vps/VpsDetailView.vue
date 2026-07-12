@@ -158,7 +158,7 @@ const osOptions = ['Ubuntu 22.04', 'Ubuntu 20.04', 'CentOS 8', 'Debian 11', 'Deb
 
 onMounted(async () => {
   try {
-    await vpsStore.fetchDetail(Number(route.params.id))
+    await vpsStore.fetchDetail(Number(route.query.vpsId))
   } catch (e: any) {
     toast.add({
       severity: 'error',
@@ -174,7 +174,7 @@ async function handleStart() {
   try {
     await vpsStore.start(vpsStore.currentVps!.id)
     toast.add({ severity: 'success', summary: '成功', detail: 'VPS 已启动', life: 2000 })
-    vpsStore.fetchDetail(Number(route.params.id))
+    vpsStore.fetchDetail(Number(route.query.vpsId))
   } catch (e: any) {
     toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '操作失败', life: 3000 })
   } finally {
@@ -187,7 +187,7 @@ async function handleStop() {
   try {
     await vpsStore.stop(vpsStore.currentVps!.id)
     toast.add({ severity: 'success', summary: '成功', detail: 'VPS 已停止', life: 2000 })
-    vpsStore.fetchDetail(Number(route.params.id))
+    vpsStore.fetchDetail(Number(route.query.vpsId))
   } catch (e: any) {
     toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '操作失败', life: 3000 })
   } finally {
@@ -200,7 +200,7 @@ async function handleRestart() {
   try {
     await vpsStore.restart(vpsStore.currentVps!.id)
     toast.add({ severity: 'success', summary: '成功', detail: 'VPS 已重启', life: 2000 })
-    vpsStore.fetchDetail(Number(route.params.id))
+    vpsStore.fetchDetail(Number(route.query.vpsId))
   } catch (e: any) {
     toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '操作失败', life: 3000 })
   } finally {
@@ -210,7 +210,7 @@ async function handleRestart() {
 
 async function handleConsole() {
   try {
-    const response = await getConsole(Number(route.params.id))
+    const response = await getConsole(Number(route.query.vpsId))
     const data = response.data.data
     if (data?.view_url) {
       window.open(data.view_url, '_blank')
@@ -228,7 +228,7 @@ async function handleReinstall() {
     await vpsStore.reinstall(vpsStore.currentVps!.id, reinstallOs.value)
     toast.add({ severity: 'success', summary: '成功', detail: '系统重装已开始', life: 2000 })
     showReinstallDialog.value = false
-    vpsStore.fetchDetail(Number(route.params.id))
+    vpsStore.fetchDetail(Number(route.query.vpsId))
   } catch (e: any) {
     toast.add({ severity: 'error', summary: '错误', detail: e.response?.data?.message || '重装失败', life: 3000 })
   } finally {
@@ -243,7 +243,7 @@ function deleteVps() {
     icon: 'pi pi-exclamation-triangle',
     acceptClass: 'p-button-danger',
     accept: async () => {
-      await vpsStore.remove(Number(route.params.id))
+      await vpsStore.remove(Number(route.query.vpsId))
       toast.add({ severity: 'success', summary: '成功', detail: 'VPS 已删除' })
       router.push('/vps')
     },

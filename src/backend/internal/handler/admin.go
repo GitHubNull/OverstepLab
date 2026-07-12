@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -34,8 +35,8 @@ func (h *OrderHandler) List(c *gin.Context) {
 
 func (h *OrderHandler) GetByID(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	order, err := h.orderService.GetDetail(user, uint(id))
+	id := middleware.DecodeUintParam(c, "orderId")
+	order, err := h.orderService.GetDetail(user, id)
 	if err != nil {
 		common.NotFound(c, "Order not found")
 		return
@@ -136,30 +137,51 @@ func (h *TicketHandler) Create(c *gin.Context) {
 
 func (h *TicketHandler) GetByID(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	ticket, err := h.ticketService.GetDetail(user, uint(id))
+	id := middleware.DecodeUintParam(c, "ticketId")
+	ticket, err := h.ticketService.GetDetail(user, id)
 	if err != nil {
 		common.NotFound(c, "Ticket not found")
 		return
 	}
-	replies, _ := h.ticketService.GetReplies(uint(id))
+	replies, _ := h.ticketService.GetReplies(id)
 	common.Success(c, gin.H{
-		"ticket": ticket,
+		"ticket":  ticket,
 		"replies": replies,
 	})
 }
 
 func (h *TicketHandler) Reply(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	var input struct {
-		Content string `json:"content"`
-	}
-	if err := c.ShouldBindJSON(&input); err != nil || input.Content == "" {
+	var rawData map[string]interface{}
+	if err := c.ShouldBindJSON(&rawData); err != nil {
 		common.BadRequest(c, "Invalid request")
 		return
 	}
-	reply, err := h.ticketService.Reply(user, uint(id), input.Content)
+
+	content := ""
+	if v, ok := rawData["content"]; ok {
+		if s, ok := v.(string); ok {
+			content = s
+		}
+	}
+	if content == "" {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+
+	encType := middleware.GetEncodingType(c)
+	ticketId := middleware.DecodeUintBodyField(rawData, "ticketId", encType)
+	if encType == "none" {
+		if v, ok := rawData["ticketId"]; ok {
+			if f, ok := v.(float64); ok {
+				ticketId = uint(f)
+			} else if s, ok := v.(string); ok {
+				fmt.Sscanf(s, "%d", &ticketId)
+			}
+		}
+	}
+
+	reply, err := h.ticketService.Reply(user, ticketId, content)
 	if err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
@@ -173,8 +195,25 @@ func (h *TicketHandler) Reply(c *gin.Context) {
 
 func (h *TicketHandler) Close(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := h.ticketService.Close(user, uint(id)); err != nil {
+	var rawData map[string]interface{}
+	if err := c.ShouldBindJSON(&rawData); err != nil {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+
+	encType := middleware.GetEncodingType(c)
+	ticketId := middleware.DecodeUintBodyField(rawData, "ticketId", encType)
+	if encType == "none" {
+		if v, ok := rawData["ticketId"]; ok {
+			if f, ok := v.(float64); ok {
+				ticketId = uint(f)
+			} else if s, ok := v.(string); ok {
+				fmt.Sscanf(s, "%d", &ticketId)
+			}
+		}
+	}
+
+	if err := h.ticketService.Close(user, ticketId); err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
 		} else {
@@ -235,8 +274,14 @@ func (h *APIKeyHandler) Create(c *gin.Context) {
 
 func (h *APIKeyHandler) Delete(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := h.apiKeyService.Delete(user, uint(id)); err != nil {
+	var input struct {
+		ID uint `json:"id"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+	if err := h.apiKeyService.Delete(user, input.ID); err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
 		} else {
@@ -283,15 +328,15 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 }
 
 func (h *AdminHandler) UpdateUserStatus(c *gin.Context) {
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	var input struct {
+		ID     uint   `json:"id"`
 		Status string `json:"status"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		common.BadRequest(c, "Invalid request")
 		return
 	}
-	if err := h.adminService.UpdateUserStatus(uint(id), input.Status); err != nil {
+	if err := h.adminService.UpdateUserStatus(input.ID, input.Status); err != nil {
 		common.InternalError(c, err.Error())
 		return
 	}
@@ -299,15 +344,15 @@ func (h *AdminHandler) UpdateUserStatus(c *gin.Context) {
 }
 
 func (h *AdminHandler) ResetUserPassword(c *gin.Context) {
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	var input struct {
+		ID       uint   `json:"id"`
 		Password string `json:"password"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil || len(input.Password) < 6 {
 		common.BadRequest(c, "Invalid password (minimum 6 characters)")
 		return
 	}
-	if err := h.adminService.ResetUserPassword(uint(id), input.Password); err != nil {
+	if err := h.adminService.ResetUserPassword(input.ID, input.Password); err != nil {
 		common.InternalError(c, err.Error())
 		return
 	}
@@ -341,7 +386,7 @@ func (h *AdminHandler) ListAllLogs(c *gin.Context) {
 	common.Success(c, logs)
 }
 
-type ChallengeHandler struct{
+type ChallengeHandler struct {
 	dbPath string
 }
 
@@ -352,23 +397,32 @@ func NewChallengeHandler(dbPath string) *ChallengeHandler {
 func (h *ChallengeHandler) List(c *gin.Context) {
 	challenges := make([]map[string]interface{}, 0)
 	for _, ch := range vuln.Challenges {
-		challenges = append(challenges, map[string]interface{}{
+		entry := map[string]interface{}{
 			"id":          ch.ID,
 			"title":       ch.Title,
 			"category":    ch.Category,
 			"difficulty":  ch.Difficulty,
 			"description": ch.Description,
 			"completed":   vuln.IsChallengeCompleted(ch.ID),
-		})
+			"endpoint":    ch.Endpoint,
+			"method":      ch.Method,
+		}
+		if ch.EncodingType != "" {
+			entry["encoding_type"] = ch.EncodingType
+		}
+		if ch.EncodedEndpoint != "" {
+			entry["encoded_endpoint"] = ch.EncodedEndpoint
+		}
+		challenges = append(challenges, entry)
 	}
 	common.Success(c, challenges)
 }
 
 func (h *ChallengeHandler) Detail(c *gin.Context) {
-	id := c.Param("id")
+	id := c.Query("id")
 	for _, ch := range vuln.Challenges {
 		if ch.ID == id {
-			common.Success(c, map[string]interface{}{
+			result := map[string]interface{}{
 				"id":          ch.ID,
 				"title":       ch.Title,
 				"category":    ch.Category,
@@ -379,7 +433,14 @@ func (h *ChallengeHandler) Detail(c *gin.Context) {
 				"completed":   vuln.IsChallengeCompleted(ch.ID),
 				"hints":       ch.Hints,
 				"writeup":     ch.WriteUp,
-			})
+			}
+			if ch.EncodingType != "" {
+				result["encoding_type"] = ch.EncodingType
+			}
+			if ch.EncodedEndpoint != "" {
+				result["encoded_endpoint"] = ch.EncodedEndpoint
+			}
+			common.Success(c, result)
 			return
 		}
 	}
@@ -387,8 +448,8 @@ func (h *ChallengeHandler) Detail(c *gin.Context) {
 }
 
 func (h *ChallengeHandler) GetHint(c *gin.Context) {
-	id := c.Param("id")
-	level, _ := strconv.ParseUint(c.Param("level"), 10, 64)
+	id := c.Query("id")
+	level, _ := strconv.ParseUint(c.Query("level"), 10, 64)
 	for _, ch := range vuln.Challenges {
 		if ch.ID == id {
 			if level == 0 || int(level) > len(ch.Hints) {
@@ -396,7 +457,7 @@ func (h *ChallengeHandler) GetHint(c *gin.Context) {
 				return
 			}
 			common.Success(c, gin.H{
-				"hint": ch.Hints[level-1],
+				"hint":  ch.Hints[level-1],
 				"level": level,
 			})
 			return
@@ -406,8 +467,14 @@ func (h *ChallengeHandler) GetHint(c *gin.Context) {
 }
 
 func (h *ChallengeHandler) MarkComplete(c *gin.Context) {
-	id := c.Param("id")
-	vuln.MarkChallengeCompleted(id)
+	var input struct {
+		ID string `json:"id"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+	vuln.MarkChallengeCompleted(input.ID)
 	common.SuccessMessage(c, "Challenge marked as completed")
 }
 
@@ -427,7 +494,7 @@ func (h *ChallengeHandler) SetSecurityMode(c *gin.Context) {
 		return
 	}
 	vuln.SetSecureMode(input.Mode == "secure")
-	common.SuccessMessage(c, "Security mode updated to " + vuln.GetModeString())
+	common.SuccessMessage(c, "Security mode updated to "+vuln.GetModeString())
 }
 
 func (h *ChallengeHandler) ResetDatabase(c *gin.Context) {
@@ -482,8 +549,8 @@ func (h *AnnouncementHandler) Create(c *gin.Context) {
 
 func (h *AnnouncementHandler) Update(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
 	var input struct {
+		ID       uint   `json:"id"`
 		Title    string `json:"title"`
 		Content  string `json:"content"`
 		IsPinned bool   `json:"is_pinned"`
@@ -492,7 +559,7 @@ func (h *AnnouncementHandler) Update(c *gin.Context) {
 		common.BadRequest(c, "Invalid request")
 		return
 	}
-	if err := h.announcementService.Update(user, uint(id), input.Title, input.Content, input.IsPinned); err != nil {
+	if err := h.announcementService.Update(user, input.ID, input.Title, input.Content, input.IsPinned); err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
 		} else {
@@ -505,8 +572,14 @@ func (h *AnnouncementHandler) Update(c *gin.Context) {
 
 func (h *AnnouncementHandler) Delete(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := h.announcementService.Delete(user, uint(id)); err != nil {
+	var input struct {
+		ID uint `json:"id"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+	if err := h.announcementService.Delete(user, input.ID); err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
 		} else {

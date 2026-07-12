@@ -1,4 +1,4 @@
-import apiClient from './client'
+import apiClient, { rawClient } from './client'
 import type { ApiResponse, Order, Bill, Ticket, TicketReply, APIKey, AuditLog, User, Company, Challenge, ChallengeDetail, Announcement } from '@/types'
 
 // Company
@@ -9,20 +9,20 @@ export const addMember = (data: { username: string; password: string; email: str
   apiClient.post<ApiResponse>('/company/members', data)
 
 export const updateMember = (id: number, data: { email?: string; phone?: string; status?: string }) =>
-  apiClient.put<ApiResponse>(`/company/members/${id}`, data)
+  apiClient.put<ApiResponse>('/company/members', { id, ...data })
 
 export const deleteMember = (id: number) =>
-  apiClient.delete<ApiResponse>(`/company/members/${id}`)
+  apiClient.delete<ApiResponse>('/company/members', { data: { id } })
 
 export const changeRole = (id: number, role: string) =>
-  apiClient.put<ApiResponse>(`/company/members/${id}/role`, { role })
+  apiClient.put<ApiResponse>('/company/members/role', { id, role })
 
 // Orders
 export const getOrders = () =>
   apiClient.get<ApiResponse<Order[]>>('/orders')
 
 export const getOrderDetail = (id: number) =>
-  apiClient.get<ApiResponse<Order>>(`/orders/${id}`)
+  apiClient.get<ApiResponse<Order>>('/orders/detail', { params: { orderId: id } })
 
 // Bills
 export const getBills = () =>
@@ -42,13 +42,13 @@ export const createTicket = (data: { title: string; content: string }) =>
   apiClient.post<ApiResponse>('/tickets', data)
 
 export const getTicketDetail = (id: number) =>
-  apiClient.get<ApiResponse<{ ticket: Ticket; replies: TicketReply[] }>>(`/tickets/${id}`)
+  apiClient.get<ApiResponse<{ ticket: Ticket; replies: TicketReply[] }>>('/tickets/detail', { params: { ticketId: id } })
 
 export const replyTicket = (id: number, content: string) =>
-  apiClient.post<ApiResponse>(`/tickets/${id}/reply`, { content })
+  apiClient.post<ApiResponse>('/tickets/reply', { ticketId: id, content })
 
 export const closeTicket = (id: number) =>
-  apiClient.put<ApiResponse>(`/tickets/${id}/close`)
+  apiClient.put<ApiResponse>('/tickets/close', { ticketId: id })
 
 // API Keys
 export const getApiKeys = () =>
@@ -58,7 +58,7 @@ export const createApiKey = (data: { name: string; permissions: string }) =>
   apiClient.post<ApiResponse>('/apikeys', data)
 
 export const deleteApiKey = (id: number) =>
-  apiClient.delete<ApiResponse>(`/apikeys/${id}`)
+  apiClient.delete<ApiResponse>('/apikeys', { data: { id } })
 
 // Audit Logs
 export const getAuditLogs = () =>
@@ -69,10 +69,10 @@ export const adminListUsers = () =>
   apiClient.get<ApiResponse<User[]>>('/admin/users')
 
 export const adminUpdateUserStatus = (id: number, status: string) =>
-  apiClient.put<ApiResponse>(`/admin/users/${id}/status`, { status })
+  apiClient.put<ApiResponse>('/admin/users/status', { id, status })
 
 export const adminResetUserPassword = (id: number, password: string) =>
-  apiClient.put<ApiResponse>(`/admin/users/${id}/password`, { password })
+  apiClient.put<ApiResponse>('/admin/users/password', { id, password })
 
 export const adminListCompanies = () =>
   apiClient.get<ApiResponse<Company[]>>('/admin/companies')
@@ -88,13 +88,13 @@ export const getChallenges = () =>
   apiClient.get<ApiResponse<Challenge[]>>('/challenges')
 
 export const getChallengeDetail = (id: string) =>
-  apiClient.get<ApiResponse<ChallengeDetail>>(`/challenges/${id}`)
+  apiClient.get<ApiResponse<ChallengeDetail>>('/challenges/detail', { params: { id } })
 
 export const getHint = (id: string, level: number) =>
-  apiClient.get<ApiResponse<{ hint: string; level: number }>>(`/challenges/${id}/hints/${level}`)
+  apiClient.get<ApiResponse<{ hint: string; level: number }>>('/challenges/hints', { params: { id, level } })
 
 export const markChallengeComplete = (id: string) =>
-  apiClient.post<ApiResponse>(`/challenges/${id}/complete`)
+  apiClient.post<ApiResponse>('/challenges/complete', { id })
 
 // Security Mode
 export const getSecurityMode = () =>
@@ -111,10 +111,15 @@ export const adminCreateAnnouncement = (data: { title: string; content: string; 
   apiClient.post<ApiResponse<Announcement>>('/admin/announcements', data)
 
 export const adminUpdateAnnouncement = (id: number, data: { title: string; content: string; is_pinned: boolean }) =>
-  apiClient.put<ApiResponse>(`/admin/announcements/${id}`, data)
+  apiClient.put<ApiResponse>('/admin/announcements', { id, ...data })
 
 export const adminDeleteAnnouncement = (id: number) =>
-  apiClient.delete<ApiResponse>(`/admin/announcements/${id}`)
+  apiClient.delete<ApiResponse>('/admin/announcements', { data: { id } })
+
+// Crypto / Encoding Tools
+export { cryptoEncode, cryptoDecode, getCryptoKeys } from './crypto'
+
+export { rawClient }
 
 // System Config
 export const getSystemConfig = () =>

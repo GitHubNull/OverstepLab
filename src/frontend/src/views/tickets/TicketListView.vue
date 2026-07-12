@@ -29,7 +29,7 @@
           </Column>
           <Column header="操作" style="width: 80px">
             <template #body="{ data }">
-              <Button label="查看" icon="pi pi-eye" text size="small" class="!text-xs" @click="$router.push(`/tickets/${data.id}`)" />
+              <Button label="查看" icon="pi pi-eye" text size="small" class="!text-xs" @click="$router.push({ path: '/tickets/detail', query: { ticketId: data.id } })" />
             </template>
           </Column>
         </DataTable>

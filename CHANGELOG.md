@@ -2,6 +2,34 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 格式，版本号基于 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.3.0] - 2026-07-12
+
+### 新增
+- 编码加密越权挑战扩展：新增 6 个编码/加密相关漏洞挑战（E-07 至 E-12）
+  - E-07 Base64 编码绕过权限校验
+  - E-08 URL 编码绕过参数过滤
+  - E-09 哈希签名验证绕过
+  - E-10 JWT 弱密钥破解
+  - E-11 AES-CBC 位翻转攻击
+  - E-12 经典密码（凯撒/维吉尼亚）编码绕过
+- 后端新增 `internal/crypto/` 密码学工具模块（经典密码、现代加密、编码、国密 SM2/SM3/SM4、大整数运算、签名验证）
+- 新增 `encoded_handler.go` 处理编码挑战 API 端点
+- 新增 `encoding.go` 中间件支持多种编码格式自动检测与解码
+- 前端新增编码挑战状态管理 (`encodingChallenge` store)
+- 前端新增 `tools/` 视图（编码转换、加解密工具箱）
+- 前端新增 `crypto.ts` / `encoded.ts` API 客户端
+- 新增教程文档 `07-encoding-crypto.md`
+
+### 变更
+- API 客户端 (`client.ts`) 重构以支持编码挑战的请求拦截与自动编码转换
+- 路由 (`router.go`) 扩展编码挑战相关端点
+- 挑战元数据 (`challenges.go`) 大幅扩展以支持编码/加密类挑战
+- 前端导航栏新增"工具箱"入口
+- PRD 文档和教程索引同步更新
+
+### 修复
+- 前端多处视图细节修正（VPS 详情、工单列表/详情、Dashboard、挑战页）
+
 ## [0.2.2] - 2026-06-29
 
 ### 修复

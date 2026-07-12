@@ -131,6 +131,8 @@ export interface Challenge {
   method?: string
   hints?: string[]
   writeup?: string
+  encoding_type?: string
+  encoded_endpoint?: string
 }
 
 export interface ChallengeDetail extends Challenge {

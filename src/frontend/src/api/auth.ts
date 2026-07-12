@@ -23,4 +23,4 @@ export const changePassword = (data: { old_password: string; new_password: strin
   apiClient.put<ApiResponse>('/user/password', data)
 
 export const getUserById = (id: number) =>
-  apiClient.get<ApiResponse<User>>(`/users/${id}`)
+  apiClient.get<ApiResponse<User>>('/users', { params: { id } })

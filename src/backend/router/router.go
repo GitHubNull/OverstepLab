@@ -42,6 +42,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 	challengeHandler := handler.NewChallengeHandler(cfg.DBPath)
 	announceHandler := handler.NewAnnouncementHandler(announceSvc)
 	configHandler := handler.NewConfigHandler()
+	encodedHandler := handler.NewEncodedHandler(vpsSvc, userSvc, orderSvc, ticketSvc, apiKeySvc, companySvc)
 
 	// Auth routes (public)
 	auth := r.Group("/api/v1/auth")
@@ -63,6 +64,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 	authGroup := api.Group("")
 	authGroup.Use(middleware.AuthMiddleware(cfg.JWTSecret))
 	authGroup.Use(middleware.AuditMiddleware())
+	authGroup.Use(middleware.EncodingMiddleware())
 	{
 		authGroup.POST("/logout", authHandler.Logout)
 
@@ -73,16 +75,16 @@ func Setup(cfg *config.Config) *gin.Engine {
 			user.PUT("/profile", userHandler.UpdateProfile)
 			user.PUT("/password", userHandler.ChangePassword)
 		}
-		authGroup.GET("/users/:id", userHandler.GetUserByID)
+		authGroup.GET("/users", userHandler.GetUserByID)
 
 		// Company routes
 		company := authGroup.Group("/company")
 		{
 			company.GET("/members", companyHandler.ListMembers)
 			company.POST("/members", companyHandler.AddMember)
-			company.PUT("/members/:id", companyHandler.UpdateMember)
-			company.DELETE("/members/:id", companyHandler.DeleteMember)
-			company.PUT("/members/:id/role", companyHandler.ChangeRole)
+			company.PUT("/members", companyHandler.UpdateMember)
+			company.DELETE("/members", companyHandler.DeleteMember)
+			company.PUT("/members/role", companyHandler.ChangeRole)
 		}
 
 		// VPS routes
@@ -90,23 +92,23 @@ func Setup(cfg *config.Config) *gin.Engine {
 		{
 			vps.GET("", vpsHandler.List)
 			vps.POST("", vpsHandler.Create)
-			vps.GET("/:id", vpsHandler.GetByID)
-			vps.POST("/:id/start", vpsHandler.Start)
-			vps.POST("/:id/stop", vpsHandler.Stop)
-			vps.POST("/:id/restart", vpsHandler.Restart)
-			vps.POST("/:id/reinstall", vpsHandler.Reinstall)
-			vps.DELETE("/:id", vpsHandler.Delete)
-			vps.GET("/:id/console", vpsHandler.Console)
+			vps.GET("/detail", vpsHandler.GetByID)
+			vps.POST("/start", vpsHandler.Start)
+			vps.POST("/stop", vpsHandler.Stop)
+			vps.POST("/restart", vpsHandler.Restart)
+			vps.POST("/reinstall", vpsHandler.Reinstall)
+			vps.DELETE("", vpsHandler.Delete)
+			vps.GET("/console", vpsHandler.Console)
 		}
 
 		// Public console view route (uses signed token, no JWT required)
-		api.GET("/vps/:id/console/view", vpsHandler.ConsoleView)
+		api.GET("/vps/console/view", vpsHandler.ConsoleView)
 
 		// Order routes
 		orders := authGroup.Group("/orders")
 		{
 			orders.GET("", orderHandler.List)
-			orders.GET("/:id", orderHandler.GetByID)
+			orders.GET("/detail", orderHandler.GetByID)
 		}
 
 		// Bill routes
@@ -122,9 +124,9 @@ func Setup(cfg *config.Config) *gin.Engine {
 		{
 			tickets.GET("", ticketHandler.List)
 			tickets.POST("", ticketHandler.Create)
-			tickets.GET("/:id", ticketHandler.GetByID)
-			tickets.POST("/:id/reply", ticketHandler.Reply)
-			tickets.PUT("/:id/close", ticketHandler.Close)
+			tickets.GET("/detail", ticketHandler.GetByID)
+			tickets.POST("/reply", ticketHandler.Reply)
+			tickets.PUT("/close", ticketHandler.Close)
 		}
 
 		// API Key routes
@@ -132,7 +134,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 		{
 			apikeys.GET("", apiKeyHandler.List)
 			apikeys.POST("", apiKeyHandler.Create)
-			apikeys.DELETE("/:id", apiKeyHandler.Delete)
+			apikeys.DELETE("", apiKeyHandler.Delete)
 		}
 
 		// Audit log routes
@@ -146,15 +148,15 @@ func Setup(cfg *config.Config) *gin.Engine {
 		admin.Use(middleware.RequireAdmin())
 		{
 			admin.GET("/users", adminHandler.ListUsers)
-			admin.PUT("/users/:id/status", adminHandler.UpdateUserStatus)
-			admin.PUT("/users/:id/password", adminHandler.ResetUserPassword)
+			admin.PUT("/users/status", adminHandler.UpdateUserStatus)
+			admin.PUT("/users/password", adminHandler.ResetUserPassword)
 			admin.GET("/companies", adminHandler.ListCompanies)
 			admin.GET("/vps", adminHandler.ListAllVPS)
 			admin.GET("/audit-logs", adminHandler.ListAllLogs)
 			admin.POST("/reset", challengeHandler.ResetDatabase)
 			admin.POST("/announcements", announceHandler.Create)
-			admin.PUT("/announcements/:id", announceHandler.Update)
-			admin.DELETE("/announcements/:id", announceHandler.Delete)
+			admin.PUT("/announcements", announceHandler.Update)
+			admin.DELETE("/announcements", announceHandler.Delete)
 			admin.GET("/config", configHandler.GetConfig)
 			admin.PUT("/config", configHandler.UpdateConfig)
 		}
@@ -163,9 +165,32 @@ func Setup(cfg *config.Config) *gin.Engine {
 		challenges := authGroup.Group("/challenges")
 		{
 			challenges.GET("", challengeHandler.List)
-			challenges.GET("/:id", challengeHandler.Detail)
-			challenges.GET("/:id/hints/:level", challengeHandler.GetHint)
-			challenges.POST("/:id/complete", challengeHandler.MarkComplete)
+			challenges.GET("/detail", challengeHandler.Detail)
+			challenges.GET("/hints", challengeHandler.GetHint)
+			challenges.POST("/complete", challengeHandler.MarkComplete)
+		}
+
+		// Encoded challenge routes (encoding/encryption wrapper endpoints)
+		encoded := authGroup.Group("/encoded")
+		{
+			encoded.GET("/vps", encodedHandler.GetVPSByEncodedID)
+			encoded.POST("/vps/start", encodedHandler.StartVPSEncoded)
+			encoded.POST("/vps/stop", encodedHandler.StopVPSEncoded)
+			encoded.POST("/vps/reinstall", encodedHandler.ReinstallVPSEncoded)
+			encoded.GET("/users", encodedHandler.GetUserByEncodedID)
+			encoded.GET("/orders", encodedHandler.GetOrderByEncodedID)
+			encoded.GET("/tickets", encodedHandler.GetTicketByEncodedID)
+			encoded.DELETE("/apikeys", encodedHandler.DeleteAPIKeyEncoded)
+			encoded.POST("/company/members", encodedHandler.AddMemberEncoded)
+			encoded.PUT("/company/members/role", encodedHandler.ChangeRoleEncoded)
+		}
+
+		// Crypto utility routes (for encoding/decoding practice)
+		cryptoGroup := authGroup.Group("/crypto")
+		{
+			cryptoGroup.POST("/encode", encodedHandler.EncodeValue)
+			cryptoGroup.POST("/decode", encodedHandler.DecodeValue)
+			cryptoGroup.GET("/keys", encodedHandler.GetCryptoKeys)
 		}
 
 		authGroup.GET("/security-mode", challengeHandler.GetSecurityMode)

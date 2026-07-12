@@ -103,6 +103,7 @@ func (s *CompanyService) UpdateMember(user *model.User, memberID uint, input *Up
 }
 
 type UpdateMemberInput struct {
+	ID     uint   `json:"id"`
 	Email  string `json:"email"`
 	Phone  string `json:"phone"`
 	Status string `json:"status"`

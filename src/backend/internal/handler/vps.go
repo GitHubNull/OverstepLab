@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/oversteplab/oversteplab/internal/common"
@@ -57,8 +56,8 @@ func (h *VPSHandler) Create(c *gin.Context) {
 
 func (h *VPSHandler) GetByID(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	vps, err := h.vpsService.GetDetail(user, uint(id))
+	id := middleware.DecodeUintParam(c, "vpsId")
+	vps, err := h.vpsService.GetDetail(user, id)
 	if err != nil {
 		common.NotFound(c, "VPS not found")
 		return
@@ -66,10 +65,45 @@ func (h *VPSHandler) GetByID(c *gin.Context) {
 	common.Success(c, vps)
 }
 
+// bindVPSBody binds JSON body, then decodes vpsId if X-Encoding-Type header is present.
+// This must be used for all body-based VPS endpoints to support encoding challenges.
+func bindVPSBody(c *gin.Context) (vpsId uint, osImage string, err error) {
+	var rawData map[string]interface{}
+	if err := c.ShouldBindJSON(&rawData); err != nil {
+		return 0, "", err
+	}
+
+	encType := middleware.GetEncodingType(c)
+	if encType != "none" {
+		vpsId = middleware.DecodeUintBodyField(rawData, "vpsId", encType)
+	} else {
+		if v, ok := rawData["vpsId"]; ok {
+			switch val := v.(type) {
+			case float64:
+				vpsId = uint(val)
+			case string:
+				fmt.Sscanf(val, "%d", &vpsId)
+			}
+		}
+	}
+
+	if v, ok := rawData["os_image"]; ok {
+		if s, ok := v.(string); ok {
+			osImage = s
+		}
+	}
+
+	return vpsId, osImage, nil
+}
+
 func (h *VPSHandler) Start(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := h.vpsService.StartVPS(user, uint(id)); err != nil {
+	vpsId, _, err := bindVPSBody(c)
+	if err != nil {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+	if err := h.vpsService.StartVPS(user, vpsId); err != nil {
 		handleVPSError(c, err)
 		return
 	}
@@ -78,8 +112,12 @@ func (h *VPSHandler) Start(c *gin.Context) {
 
 func (h *VPSHandler) Stop(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := h.vpsService.StopVPS(user, uint(id)); err != nil {
+	vpsId, _, err := bindVPSBody(c)
+	if err != nil {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+	if err := h.vpsService.StopVPS(user, vpsId); err != nil {
 		handleVPSError(c, err)
 		return
 	}
@@ -88,8 +126,12 @@ func (h *VPSHandler) Stop(c *gin.Context) {
 
 func (h *VPSHandler) Restart(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := h.vpsService.RestartVPS(user, uint(id)); err != nil {
+	vpsId, _, err := bindVPSBody(c)
+	if err != nil {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+	if err := h.vpsService.RestartVPS(user, vpsId); err != nil {
 		handleVPSError(c, err)
 		return
 	}
@@ -98,15 +140,12 @@ func (h *VPSHandler) Restart(c *gin.Context) {
 
 func (h *VPSHandler) Reinstall(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	var input struct {
-		OSImage string `json:"os_image"`
-	}
-	if err := c.ShouldBindJSON(&input); err != nil {
+	vpsId, osImage, err := bindVPSBody(c)
+	if err != nil {
 		common.BadRequest(c, "Invalid request")
 		return
 	}
-	if err := h.vpsService.ReinstallVPS(user, uint(id), input.OSImage); err != nil {
+	if err := h.vpsService.ReinstallVPS(user, vpsId, osImage); err != nil {
 		handleVPSError(c, err)
 		return
 	}
@@ -115,8 +154,12 @@ func (h *VPSHandler) Reinstall(c *gin.Context) {
 
 func (h *VPSHandler) Delete(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err := h.vpsService.DeleteVPS(user, uint(id)); err != nil {
+	vpsId, _, err := bindVPSBody(c)
+	if err != nil {
+		common.BadRequest(c, "Invalid request")
+		return
+	}
+	if err := h.vpsService.DeleteVPS(user, vpsId); err != nil {
 		handleVPSError(c, err)
 		return
 	}
@@ -125,8 +168,8 @@ func (h *VPSHandler) Delete(c *gin.Context) {
 
 func (h *VPSHandler) Console(c *gin.Context) {
 	user := middleware.GetCurrentUser(c)
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	console, err := h.vpsService.GetConsole(user, uint(id))
+	id := middleware.DecodeUintParam(c, "vpsId")
+	console, err := h.vpsService.GetConsole(user, id)
 	if err != nil {
 		handleVPSError(c, err)
 		return
@@ -141,8 +184,8 @@ func (h *VPSHandler) ConsoleView(c *gin.Context) {
 		return
 	}
 
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	data, err := h.vpsService.GetConsoleView(token, uint(id))
+	id := middleware.DecodeUintParam(c, "vpsId")
+	data, err := h.vpsService.GetConsoleView(token, id)
 	if err != nil {
 		if err == service.ErrUnauthorized {
 			common.Forbidden(c, err.Error())
