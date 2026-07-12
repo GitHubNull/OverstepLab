@@ -2,6 +2,11 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 格式，版本号基于 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.3.1] - 2026-07-12
+
+### 修复
+- 重写前端 MD5 算法实现（`crypto.ts`），替换为更标准可靠的版本，修复哈希计算正确性问题
+
 ## [0.3.0] - 2026-07-12
 
 ### 新增
