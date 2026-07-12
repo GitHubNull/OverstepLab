@@ -5,6 +5,11 @@ import {
   base32Encode,
   caesarEncode,
   customBase64Encode,
+  multiEncode,
+  aesEncrypt,
+  sm4Encrypt,
+  hmacSign,
+  md5Hash,
 } from '@/utils/crypto'
 
 const apiClient: AxiosInstance = axios.create({
@@ -51,8 +56,8 @@ async function fetchEncodingState(): Promise<void> {
   }
 }
 
-// Encode a single value
-function encodeValue(value: string, type: string): string {
+// Encode a single value (async for encryption types)
+async function encodeValue(value: string, type: string): Promise<string> {
   switch (type) {
     case 'base64':
       return base64Encode(value)
@@ -62,13 +67,21 @@ function encodeValue(value: string, type: string): string {
       return caesarEncode(value, 3)
     case 'custom-base64':
       return customBase64Encode(value)
+    case 'multi':
+      return multiEncode(value)
+    case 'aes':
+      // Key exposed intentionally for challenge (E-06)
+      return aesEncrypt(value, 'oversteplab-aes-secret-key-32b')
+    case 'sm4':
+      // Key exposed intentionally for challenge (E-08)
+      return sm4Encrypt(value, 'oversteplab-sm4-secret-key')
     default:
       return value
   }
 }
 
 // Recursively encode all string/number values in an object
-function encodeObjectValues(obj: any, type: string): any {
+async function encodeObjectValues(obj: any, type: string): Promise<any> {
   if (obj === null || obj === undefined) return obj
   if (typeof obj === 'string') {
     // Don't encode empty strings or JWT tokens
@@ -82,16 +95,28 @@ function encodeObjectValues(obj: any, type: string): any {
     return obj
   }
   if (Array.isArray(obj)) {
-    return obj.map(v => encodeObjectValues(v, type))
+    return Promise.all(obj.map(v => encodeObjectValues(v, type)))
   }
   if (typeof obj === 'object') {
     const result: any = {}
     for (const [key, value] of Object.entries(obj)) {
-      result[key] = encodeObjectValues(value, type)
+      result[key] = await encodeObjectValues(value, type)
     }
     return result
   }
   return obj
+}
+
+// Compute HMAC sign for the entire request body (for E-07)
+async function computeHmacHeader(data: any): Promise<string> {
+  const bodyStr = typeof data === 'string' ? data : JSON.stringify(data)
+  return hmacSign('oversteplab-hmac-secret-key', bodyStr)
+}
+
+// Compute MD5 hash sign for the entire request body (for E-09)
+async function computeHashSignHeader(data: any): Promise<string> {
+  const bodyStr = typeof data === 'string' ? data : JSON.stringify(data)
+  return md5Hash(bodyStr + '|oversteplab-hash-salt')
 }
 
 // ---- Request interceptor: token injection + encoding ----
@@ -111,13 +136,25 @@ apiClient.interceptors.request.use(async (config) => {
     config.headers['X-Encoding-Type'] = globalEncodingType
     const method = config.method?.toUpperCase() || 'GET'
 
-    if (method === 'GET' || method === 'HEAD') {
+    if (globalEncodingType === 'hmac') {
+      // HMAC: body stays plaintext, but add X-HMAC-Sign header
+      if (config.data !== undefined && config.data !== null) {
+        const sign = await computeHmacHeader(config.data)
+        config.headers['X-HMAC-Sign'] = sign
+      }
+    } else if (globalEncodingType === 'hash-sign') {
+      // Hash-Sign: body stays plaintext, but add X-Hash-Sign header (MD5 of body+salt)
+      if (config.data !== undefined && config.data !== null) {
+        const sign = await computeHashSignHeader(config.data)
+        config.headers['X-Hash-Sign'] = sign
+      }
+    } else if (method === 'GET' || method === 'HEAD') {
       if (config.params && typeof config.params === 'object') {
-        config.params = encodeObjectValues(config.params, globalEncodingType)
+        config.params = await encodeObjectValues(config.params, globalEncodingType)
       }
     } else {
       if (config.data !== undefined && config.data !== null) {
-        config.data = encodeObjectValues(config.data, globalEncodingType)
+        config.data = await encodeObjectValues(config.data, globalEncodingType)
       }
     }
   }

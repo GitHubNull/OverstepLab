@@ -81,6 +81,35 @@ func DecodeQueryValue(encType string, value string) string {
 			return value
 		}
 		return string(decoded)
+	case "multi":
+		// Multi-layer: Base64 -> Base32
+		decoded, err := crypto.Base32Decode(value)
+		if err != nil {
+			return value
+		}
+		decoded2, err := crypto.Base64Decode(string(decoded))
+		if err != nil {
+			return value
+		}
+		return string(decoded2)
+	case "aes":
+		// Key: oversteplab-aes-secret-key-32b (hashed to 32 bytes internally)
+		decoded, err := crypto.AESDecrypt(value, []byte("oversteplab-aes-secret-key-32b"))
+		if err != nil {
+			return value
+		}
+		return string(decoded)
+	case "sm4":
+		// Key: oversteplab-sm4-secret-key (hashed to 16 bytes internally)
+		decoded, err := crypto.SM4Decrypt(value, []byte("oversteplab-sm4-secret-key"))
+		if err != nil {
+			return value
+		}
+		return string(decoded)
+	case "hash-sign":
+		// Format: value:md5(value|salt) — extract value part
+		parts := strings.SplitN(value, ":", 2)
+		return parts[0]
 	default:
 		return value
 	}
@@ -88,7 +117,8 @@ func DecodeQueryValue(encType string, value string) string {
 
 // DecodeBodyFields 解码JSON body中所有字符串字段值
 func DecodeBodyFields(encType string, body []byte) []byte {
-	if encType == "none" || encType == "" {
+	if encType == "none" || encType == "" || encType == "hmac" || encType == "hash-sign" {
+		// hmac/hash-sign: body stays plaintext, signature is in header
 		return body
 	}
 	var data map[string]interface{}

@@ -64,6 +64,7 @@ func Setup(cfg *config.Config) *gin.Engine {
 	authGroup := api.Group("")
 	authGroup.Use(middleware.AuthMiddleware(cfg.JWTSecret))
 	authGroup.Use(middleware.EncodingMiddleware())
+	authGroup.Use(middleware.HandleEncodingSignatures())
 	authGroup.Use(middleware.AuditMiddleware())
 	{
 		authGroup.POST("/logout", authHandler.Logout)
