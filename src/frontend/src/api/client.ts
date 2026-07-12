@@ -37,7 +37,7 @@ function shouldSkipEncoding(url: string): boolean {
 // Fetch encoding state from backend
 async function fetchEncodingState(): Promise<void> {
   try {
-    const res = await rawClient.get('/encoding-challenge-state')
+    const res = await apiClient.get('/encoding-challenge-state')
     if (res.data?.data?.active) {
       globalEncodingType = res.data.data.encoding_type || 'none'
       globalEncodingChallengeId = res.data.data.challenge_id || null
@@ -67,13 +67,19 @@ function encodeValue(value: string, type: string): string {
   }
 }
 
-// Recursively encode all string values in an object
+// Recursively encode all string/number values in an object
 function encodeObjectValues(obj: any, type: string): any {
   if (obj === null || obj === undefined) return obj
   if (typeof obj === 'string') {
     // Don't encode empty strings or JWT tokens
     if (obj === '' || obj.startsWith('Bearer ')) return obj
     return encodeValue(obj, type)
+  }
+  if (typeof obj === 'number') {
+    return encodeValue(String(obj), type)
+  }
+  if (typeof obj === 'boolean') {
+    return obj
   }
   if (Array.isArray(obj)) {
     return obj.map(v => encodeObjectValues(v, type))

@@ -189,6 +189,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import * as api from '@/api'
+import { refreshEncodingState } from '@/api/client'
 import type { Challenge, ChallengeDetail } from '@/types'
 import Tag from 'primevue/tag'
 import Button from 'primevue/button'
@@ -323,6 +324,8 @@ async function toggleEncodingChallenge(ch: Challenge) {
       encoding_type: !isActive ? (ch.encoding_type || 'base64') : 'none',
       challenge_name: !isActive ? ch.title : null,
     }
+    // Sync global encoding state in client.ts interceptor
+    await refreshEncodingState()
     toast.add({
       severity: 'success',
       summary: !isActive ? '已激活' : '已关闭',
@@ -348,6 +351,8 @@ async function deactivateEncodingChallenge() {
       active: false,
     })
     encodingState.value = { active: false, challenge_id: null, encoding_type: 'none', challenge_name: null }
+    // Sync global encoding state in client.ts interceptor
+    await refreshEncodingState()
     toast.add({ severity: 'success', summary: '已关闭', detail: '编码挑战已关闭', life: 2000 })
   } catch (e: any) {
     toast.add({
