@@ -2,6 +2,13 @@
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 格式，版本号基于 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.3.3] - 2026-08-09
+
+### Security
+- 前端依赖供应链安全加固（依据 ChainDrop 供应链投毒事件调查报告）：
+  - 新增 `.npmrc` 配置：`minimumReleaseAge=4320`（新发布版本 3 天冷却期）、`ignore-scripts=true`（禁用依赖安装脚本）
+  - `package.json` 新增 `pnpm.onlyBuiltDependencies` 白名单，仅放行 sharp 的构建脚本
+
 ## [0.3.2] - 2026-07-12
 
 ### 文档
@@ -100,6 +107,7 @@
 - TailwindCSS + PrimeVue 4 前端 UI 框架
 - 一键启动脚本（Windows CMD/PowerShell、Linux/macOS Shell）
 
+[0.3.3]: https://github.com/GitHubNull/OverstepLab/compare/v0.3.2...v0.3.3
 [0.3.2]: https://github.com/GitHubNull/OverstepLab/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/GitHubNull/OverstepLab/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/GitHubNull/OverstepLab/compare/v0.2.2...v0.3.0
